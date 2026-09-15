@@ -32,7 +32,8 @@ message("Build type: " ${CMAKE_BUILD_TYPE})
 enable_language(C ASM)
 
 # Create an executable object type
-add_executable(${CMAKE_PROJECT_NAME})
+add_executable(${CMAKE_PROJECT_NAME}
+        Drivers/MPU6050/mpu6050.c)
 
 
 set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
@@ -56,6 +57,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     App/app.c
         Drivers/Debug/debug.c
+        Drivers/MPU6050/mpu6050.c
 )
 
 # Add include paths
@@ -63,6 +65,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
     App
         Drivers/Debug
+        Drivers/MPU6050
 )
 
 # Add project symbols (macros)

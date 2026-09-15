@@ -1,13 +1,19 @@
 #include "app.h"
 #include "debug.h"
 #include "main.h"
+#include "mpu6050.h"
 
 static uint32_t s_lastTick = 0;
-
+extern I2C_HandleTypeDef hi2c2;
 void App_Init(void)
 {
     Debug_Init(&huart1);
     Debug_Print("System Init OK\r\n");
+    uint8_t who = MPU6050_ReadWhoAmI(&hi2c2);
+    Debug_Print("WHO_AM_I = ");
+    Debug_PrintHex(who);
+    Debug_Print("\r\n");
+
 }
 
 void App_Run(void)
