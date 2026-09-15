@@ -20,7 +20,7 @@
           all peripherals mapped on these buses are running at HSI speed.
       (+) The clock for all peripherals is switched off, except the SRAM and FLASH.
       (+) All GPIOs are in input floating state, except the JTAG pins which
-          are assigned to be used for Debug purpose.
+          are assigned to be used for debug purpose.
     [..] Once the device started from reset, the user application has to:
       (+) Configure the clock source to be used to drive the System clock
           (if the application needs higher frequency/performance)

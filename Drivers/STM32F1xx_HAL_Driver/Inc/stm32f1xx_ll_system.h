@@ -116,10 +116,10 @@ extern "C" {
 #define LL_DBGMCU_APB1_GRP1_I2C2_STOP      DBGMCU_CR_DBG_I2C2_SMBUS_TIMEOUT /*!< I2C2 SMBUS timeout mode stopped when Core is halted */
 #endif /* DBGMCU_CR_DBG_I2C2_SMBUS_TIMEOUT */
 #if defined(DBGMCU_CR_DBG_CAN1_STOP)
-#define LL_DBGMCU_APB1_GRP1_CAN1_STOP      DBGMCU_CR_DBG_CAN1_STOP          /*!< CAN1 Debug stopped when Core is halted  */
+#define LL_DBGMCU_APB1_GRP1_CAN1_STOP      DBGMCU_CR_DBG_CAN1_STOP          /*!< CAN1 debug stopped when Core is halted  */
 #endif /* DBGMCU_CR_DBG_CAN1_STOP */
 #if defined(DBGMCU_CR_DBG_CAN2_STOP)
-#define LL_DBGMCU_APB1_GRP1_CAN2_STOP      DBGMCU_CR_DBG_CAN2_STOP          /*!< CAN2 Debug stopped when Core is halted  */
+#define LL_DBGMCU_APB1_GRP1_CAN2_STOP      DBGMCU_CR_DBG_CAN2_STOP          /*!< CAN2 debug stopped when Core is halted  */
 #endif /* DBGMCU_CR_DBG_CAN2_STOP */
 /**
   * @}

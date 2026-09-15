@@ -226,7 +226,7 @@
 
     <strong>IO Type Qualifiers</strong> are used
     \li to specify the access to peripheral variables.
-    \li for automatic generation of peripheral register Debug information.
+    \li for automatic generation of peripheral register debug information.
 */
 #ifdef __cplusplus
   #define   __I     volatile             /*!< Defines 'read only' permissions */
@@ -2587,7 +2587,7 @@ __STATIC_INLINE uint32_t SysTick_Config(uint32_t ticks)
 /**
   \ingroup  CMSIS_Core_FunctionInterface
   \defgroup CMSIS_core_DebugFunctions ITM Functions
-  \brief    Functions that access the ITM Debug interface.
+  \brief    Functions that access the ITM debug interface.
   @{
  */
 

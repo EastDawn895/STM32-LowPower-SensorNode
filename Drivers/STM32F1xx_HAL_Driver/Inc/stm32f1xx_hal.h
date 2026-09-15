@@ -75,7 +75,7 @@ extern HAL_TickFreqTypeDef uwTickFreq;
   *                  STM32F101xF/G and STM32F103xF/G
   *                  STM32F10xx4 and STM32F10xx6
   *       Debug registers DBGMCU_IDCODE and DBGMCU_CR are accessible only in
-  *       Debug mode (not accessible by the user software in normal mode).
+  *       debug mode (not accessible by the user software in normal mode).
   *       Refer to errata sheet of these devices for more details.
   * @{
   */

@@ -630,7 +630,7 @@ static void FLASH_MassErase(uint32_t Banks)
   * @note   An option byte erase is done automatically in this function. 
   * @note   When the memory read protection level is selected (RDP level = 1), 
   *         it is not possible to program or erase the flash page i if
-  *         Debug features are connected or boot code is executed in RAM, even if nWRPi = 1
+  *         debug features are connected or boot code is executed in RAM, even if nWRPi = 1 
   * 
   * @param  WriteProtectPage specifies the page(s) to be write protected.
   *         The value of this parameter depend on device used within the same series 
@@ -753,7 +753,7 @@ static HAL_StatusTypeDef FLASH_OB_EnableWRP(uint32_t WriteProtectPage)
   * @note   An option byte erase is done automatically in this function. 
   * @note   When the memory read protection level is selected (RDP level = 1), 
   *         it is not possible to program or erase the flash page i if   
-  *         Debug features are connected or boot code is executed in RAM, even if nWRPi = 1
+  *         debug features are connected or boot code is executed in RAM, even if nWRPi = 1 
   * 
   * @param  WriteProtectPage specifies the page(s) to be write unprotected.
   *         The value of this parameter depend on device used within the same series 

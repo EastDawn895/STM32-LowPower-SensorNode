@@ -432,7 +432,7 @@ uint32_t HAL_GetHalVersion(void)
   *                  STM32F101xF/G and STM32F103xF/G
   *                  STM32F10xx4 and STM32F10xx6
   *       Debug registers DBGMCU_IDCODE and DBGMCU_CR are accessible only in
-  *       Debug mode (not accessible by the user software in normal mode).
+  *       debug mode (not accessible by the user software in normal mode).
   *       Refer to errata sheet of these devices for more details.
   * @retval Device revision identifier
   */
@@ -448,7 +448,7 @@ uint32_t HAL_GetREVID(void)
   *                  STM32F101xF/G and STM32F103xF/G
   *                  STM32F10xx4 and STM32F10xx6
   *       Debug registers DBGMCU_IDCODE and DBGMCU_CR are accessible only in
-  *       Debug mode (not accessible by the user software in normal mode).
+  *       debug mode (not accessible by the user software in normal mode).
   *       Refer to errata sheet of these devices for more details.
   * @retval Device identifier
   */
@@ -500,7 +500,7 @@ void HAL_DBGMCU_EnableDBGSleepMode(void)
   *                  STM32F101xF/G and STM32F103xF/G
   *                  STM32F10xx4 and STM32F10xx6
   *       Debug registers DBGMCU_IDCODE and DBGMCU_CR are accessible only in
-  *       Debug mode (not accessible by the user software in normal mode).
+  *       debug mode (not accessible by the user software in normal mode).
   *       Refer to errata sheet of these devices for more details.
   * @retval None
   */
@@ -516,20 +516,20 @@ void HAL_DBGMCU_DisableDBGSleepMode(void)
   *                  STM32F101xF/G and STM32F103xF/G
   *                  STM32F10xx4 and STM32F10xx6
   *       Debug registers DBGMCU_IDCODE and DBGMCU_CR are accessible only in
-  *       Debug mode (not accessible by the user software in normal mode).
+  *       debug mode (not accessible by the user software in normal mode).
   *       Refer to errata sheet of these devices for more details.
   * Note: On all STM32F1 devices:
   *       If the system tick timer interrupt is enabled during the Stop mode
-  *       Debug (DBG_STOP bit set in the DBGMCU_CR register ), it will wakeup
+  *       debug (DBG_STOP bit set in the DBGMCU_CR register ), it will wakeup
   *       the system from Stop mode.
-  *       Workaround: To Debug the Stop mode, disable the system tick timer
+  *       Workaround: To debug the Stop mode, disable the system tick timer
   *       interrupt.
   *       Refer to errata sheet of these devices for more details.
   * Note: On all STM32F1 devices:
   *       If the system tick timer interrupt is enabled during the Stop mode
-  *       Debug (DBG_STOP bit set in the DBGMCU_CR register ), it will wakeup
+  *       debug (DBG_STOP bit set in the DBGMCU_CR register ), it will wakeup
   *       the system from Stop mode.
-  *       Workaround: To Debug the Stop mode, disable the system tick timer
+  *       Workaround: To debug the Stop mode, disable the system tick timer
   *       interrupt.
   *       Refer to errata sheet of these devices for more details.
   * @retval None
@@ -546,7 +546,7 @@ void HAL_DBGMCU_EnableDBGStopMode(void)
   *                  STM32F101xF/G and STM32F103xF/G
   *                  STM32F10xx4 and STM32F10xx6
   *       Debug registers DBGMCU_IDCODE and DBGMCU_CR are accessible only in
-  *       Debug mode (not accessible by the user software in normal mode).
+  *       debug mode (not accessible by the user software in normal mode).
   *       Refer to errata sheet of these devices for more details.
   * @retval None
   */
@@ -562,7 +562,7 @@ void HAL_DBGMCU_DisableDBGStopMode(void)
   *                  STM32F101xF/G and STM32F103xF/G
   *                  STM32F10xx4 and STM32F10xx6
   *       Debug registers DBGMCU_IDCODE and DBGMCU_CR are accessible only in
-  *       Debug mode (not accessible by the user software in normal mode).
+  *       debug mode (not accessible by the user software in normal mode).
   *       Refer to errata sheet of these devices for more details.
   * @retval None
   */
@@ -578,7 +578,7 @@ void HAL_DBGMCU_EnableDBGStandbyMode(void)
   *                  STM32F101xF/G and STM32F103xF/G
   *                  STM32F10xx4 and STM32F10xx6
   *       Debug registers DBGMCU_IDCODE and DBGMCU_CR are accessible only in
-  *       Debug mode (not accessible by the user software in normal mode).
+  *       debug mode (not accessible by the user software in normal mode).
   *       Refer to errata sheet of these devices for more details.
   * @retval None
   */
