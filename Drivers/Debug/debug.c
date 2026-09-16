@@ -25,4 +25,31 @@ void Debug_PrintHex(uint8_t val)
     Debug_Print(buf);
 }
 
+void Debug_PrintInt(int32_t val)
+{
+    char buf[12];
+    char digits[12];
+    int i = 0, j = 0;
+    uint32_t u;
+
+    if (val < 0) {
+        buf[i++] = '-';
+        u = (uint32_t)(-val);
+    } else {
+        u = (uint32_t)val;
+    }
+
+    do {                                    /* 低位先存进 digits */
+        digits[j++] = (char)('0' + (u % 10));
+        u /= 10;
+    } while (u > 0);
+
+    while (j > 0) {                         /* 反转写回 buf */
+        buf[i++] = digits[--j];
+    }
+    buf[i] = '\0';                          /* 结尾必须补 \0 */
+
+    Debug_Print(buf);
+}
+
 
