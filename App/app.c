@@ -2,6 +2,7 @@
 #include "debug.h"
 #include "main.h"
 #include "mpu6050.h"
+#include "oled.h"
 
 static uint32_t s_lastTick = 0;
 extern I2C_HandleTypeDef hi2c2;
@@ -14,7 +15,8 @@ void App_Init(void)
     Debug_Print("WHO_AM_I = ");
     Debug_PrintHex(who);
     Debug_Print("\r\n");
-
+    OLED_Init();
+    OLED_ShowString(1, 1, "SensorNode");
 
 }
 
@@ -28,27 +30,33 @@ void App_Run(void)
         s_lastTick = now;
         HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 
-        if (MPU6050_ReadData(&hi2c2, &data) == HAL_OK)
+        HAL_StatusTypeDef rc = MPU6050_ReadData(&hi2c2, &data);
+        if (rc == HAL_OK)
         {
-            /* 这里用 Debug_Print + Debug_PrintInt 打印 6 个轴的值 */
-            if (MPU6050_ReadData(&hi2c2, &data) == HAL_OK)
-            {
-                Debug_Print("AX=");  Debug_PrintInt(data.ax);
-                Debug_Print(" AY="); Debug_PrintInt(data.ay);
-                Debug_Print(" AZ="); Debug_PrintInt(data.az);
-                Debug_Print(" GX="); Debug_PrintInt(data.gx);
-                Debug_Print(" GY="); Debug_PrintInt(data.gy);
-                Debug_Print(" GZ="); Debug_PrintInt(data.gz);
-                Debug_Print("\r\n");
-            }
-            else
-            {
-                Debug_Print("ReadData FAIL\r\n");
-            }
+            /* 这里用 Debug_Print + Debug_PrintFixed 打印 6 个轴的值 */
+            int32_t ax = (int32_t)data.ax * 100 / 16384;
+            int32_t ay = (int32_t)data.ay * 100 / 16384;
+            int32_t az = (int32_t)data.az * 100 / 16384;
+            int32_t gx = (int32_t)data.gx * 100 / 131;
+            int32_t gy = (int32_t)data.gy * 100 / 131;
+            int32_t gz = (int32_t)data.gz * 100 / 131;
+            Debug_Print("AX="); Debug_PrintFixed(ax, 2);
+            Debug_Print(" AY="); Debug_PrintFixed(ay, 2);
+            Debug_Print(" AZ="); Debug_PrintFixed(az, 2);
+            Debug_Print(" | Gx="); Debug_PrintFixed(gx, 1);
+            Debug_Print(" Gy="); Debug_PrintFixed(gy, 1);
+            Debug_Print(" Gz="); Debug_PrintFixed(gz, 1);
+            Debug_Print("\r\n");
+            OLED_ShowString(2, 1, "AX=");
+            OLED_ShowSignedNum(2, 4, data.ax, 6);
+            OLED_ShowString(3, 1, "Gx=");
+            OLED_ShowSignedNum(3, 4, data.gx, 6);
         }
         else
         {
-            Debug_Print("ReadData FAIL\r\n");
+            Debug_Print("FAIL rc="); Debug_PrintInt((int32_t)rc);
+            Debug_Print("\r\n");
         }
     }
 }
+

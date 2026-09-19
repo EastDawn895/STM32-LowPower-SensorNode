@@ -18,6 +18,9 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug")
 endif()
 
+# Debug 构建统一使用 -Og：默认无优化(-O0)会让 HAL 代码体积撑爆 64KB flash
+set(CMAKE_C_FLAGS_DEBUG "-Og -g" CACHE STRING "Debug C flags" FORCE)
+
 # Set the project name
 set(CMAKE_PROJECT_NAME STM32-LowPower-SensorNode)
 
@@ -33,7 +36,10 @@ enable_language(C ASM)
 
 # Create an executable object type
 add_executable(${CMAKE_PROJECT_NAME}
-        Drivers/MPU6050/mpu6050.c)
+        Drivers/MPU6050/mpu6050.c
+        Drivers/OLED/oled.c
+        Drivers/OLED/oled.h
+        Drivers/OLED/oled_font.c)
 
 
 set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
@@ -58,6 +64,8 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     App/app.c
         Drivers/Debug/debug.c
         Drivers/MPU6050/mpu6050.c
+        Drivers/OLED/oled.c
+        Drivers/OLED/oled_font.c
 )
 
 # Add include paths
@@ -66,6 +74,8 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     App
         Drivers/Debug
         Drivers/MPU6050
+        Drivers/OLED
+
 )
 
 # Add project symbols (macros)
@@ -81,4 +91,16 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     stm32cubemx
 
     # Add user defined libraries
+)
+
+add_compile_options(
+        -mcpu=cortex-m3
+        -mthumb
+        -mfloat-abi=soft
+)
+add_link_options(
+        -mcpu=cortex-m3
+        -mthumb
+        -T${CMAKE_SOURCE_DIR}/STM32F103xx_FLASH.ld
+        -Wl,--gc-sections
 )

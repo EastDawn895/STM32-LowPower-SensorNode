@@ -50,12 +50,14 @@ uint8_t MPU6050_ReadWhoAmI(I2C_HandleTypeDef *hi2c)
 HAL_StatusTypeDef MPU6050_ReadData(I2C_HandleTypeDef *hi2c, MPU6050_Data_t *data)
 {
     uint8_t buf[14];
+    HAL_StatusTypeDef status;
 
     /* 一次读 14 字节：从 0x3B 开始，芯片自动递增地址 */
-    if (HAL_I2C_Mem_Read(hi2c, MPU6050_ADDR, MPU6050_REG_ACCEL_XOUT_H,
-                         I2C_MEMADD_SIZE_8BIT, buf, 14, 100) != HAL_OK)
+    status = HAL_I2C_Mem_Read(hi2c, MPU6050_ADDR, MPU6050_REG_ACCEL_XOUT_H,
+                              I2C_MEMADD_SIZE_8BIT, buf, 14, 100);
+    if (status != HAL_OK)
     {
-        return HAL_ERROR;   /* 失败返回错误码 */
+        return status;   /* 把原始返回值原样传出去，别吞成 HAL_ERROR */
     }
 
     /* 大端拼接：高字节 << 8 | 低字节 */
