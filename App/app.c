@@ -10,6 +10,8 @@ void App_Init(void)
 {
     Debug_Init(&huart1);
     MPU6050_Init(&hi2c2);
+    Debug_Print("Calibrating gyro, keep still...\r\n");
+    MPU6050_CalibrateGyro(&hi2c2, 200);
     Debug_Print("System Init OK\r\n");
     uint8_t who = MPU6050_ReadWhoAmI(&hi2c2);
     Debug_Print("WHO_AM_I = ");
