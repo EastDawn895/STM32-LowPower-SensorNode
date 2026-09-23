@@ -66,7 +66,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
         Drivers/MPU6050/mpu6050.c
         Drivers/OLED/oled.c
         Drivers/OLED/oled_font.c
-        Middlewares/Filter/moving_avg.c
+        Libs/Filter/moving_avg.c
 )
 
 # Add include paths
@@ -76,7 +76,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
         Drivers/Debug
         Drivers/MPU6050
         Drivers/OLED
-        Middlewares/Filter
+        Libs/Filter
 )
 
 # Add project symbols (macros)
