@@ -15,11 +15,11 @@ int32_t MovingAvg_Update(MovingAvg_t *f, int32_t sample) {
        ⑤ return sum / count;                      ← 注意预热期分母是 count 不是 N */
     if (f->count == MOVING_AVG_WIN) {
         f->sum -= f->buf[f->idx];
-    }else {
+    } else {
         f->count++;
     }
     f->buf[f->idx] = sample;
     f->sum += sample;
     f->idx = (f->idx + 1) % MOVING_AVG_WIN;
-    return f->sum/f->count;
+    return f->sum / f->count;
 }

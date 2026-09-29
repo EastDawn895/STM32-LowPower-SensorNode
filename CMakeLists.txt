@@ -66,6 +66,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
         Drivers/MPU6050/mpu6050.c
         Drivers/OLED/oled.c
         Drivers/OLED/oled_font.c
+        Drivers/LightSensor/light_sensor.c
         Libs/Filter/moving_avg.c
 )
 
@@ -76,6 +77,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
         Drivers/Debug
         Drivers/MPU6050
         Drivers/OLED
+        Drivers/LightSensor
         Libs/Filter
 )
 
