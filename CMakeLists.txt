@@ -39,7 +39,12 @@ add_executable(${CMAKE_PROJECT_NAME}
         Drivers/MPU6050/mpu6050.c
         Drivers/OLED/oled.c
         Drivers/OLED/oled.h
-        Drivers/OLED/oled_font.c)
+        Drivers/OLED/oled_font.c
+
+        App/Sensor/sensor_manager.c
+        App/Sensor/sensor_manager.h
+        App/Monitor/monitor.c
+)
 
 
 set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES
@@ -62,6 +67,9 @@ target_link_options(${CMAKE_PROJECT_NAME} PRIVATE
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     App/app.c
+        App/Sensor/sensor_state.c
+        App/Sensor/sensor_manager.c
+        App/Monitor/monitor.c
         Drivers/Debug/debug.c
         Drivers/MPU6050/mpu6050.c
         Drivers/OLED/oled.c
@@ -74,11 +82,17 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
     App
+        App
+        App/Sensor
+        App/Monitor
+
         Drivers/Debug
         Drivers/MPU6050
         Drivers/OLED
         Drivers/LightSensor
+
         Libs/Filter
+
 )
 
 # Add project symbols (macros)
