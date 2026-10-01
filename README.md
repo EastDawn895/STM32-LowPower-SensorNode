@@ -5,9 +5,9 @@ A low-power real-time data acquisition and monitoring node built on an STM32F103
 The project is a from-scratch migration from the legacy Keil + Standard Peripheral Library (SPL)
 toolchain to a modern **STM32CubeMX + HAL + CMake + GCC** workflow, developed in CLion.
 
-> **Status:** early stage. The HAL project skeleton, debug output, system clock, and a
-> non-blocking scheduler are implemented and running on hardware. Sensor acquisition and the
-> remaining features are planned (see [Roadmap](#roadmap)).
+> Status: Sensor acquisition pipeline is operational.
+> MPU6050, light sensor, OLED monitoring, filtering and modular application
+> architecture have been implemented. FreeRTOS and low-power optimization are planned.
 
 ## Hardware
 
@@ -79,13 +79,44 @@ cmake --build build
 Flash the resulting `build/STM32-LowPower-SensorNode.elf` to the board with ST-Link (via
 OpenOCD / GDB or STM32CubeProgrammer).
 
-## Roadmap
+## Version History
 
-1. **v0.1** — HAL skeleton, debug UART, 72 MHz clock, non-blocking scheduler, LED heartbeat
-2. **v0.2** — MPU6050 acquisition over I2C
-3. **v0.3** — Filtering + state machine
-4. **v1.0** — Alarm, flash storage, low-power modes
+- v0.1
+      - HAL skeleton
+      - UART debug
+      - non-blocking scheduler
 
+- v0.2
+      - MPU6050 I2C driver
+      - OLED display
+
+- v0.3
+      - Gyroscope calibration
+      - Moving average filtering
+      - Sensor sampling pipeline
+
+- v0.4
+      - Refactor application architecture
+      - Separate SensorManager and Monitor modules
+      - Add light sensor acquisition
+
+- v1.0 (planned)
+      - FreeRTOS
+      - low-power modes
+      - alarm system
+      - flash storage
 ## License
+
+## Architecture
+
+App
+├── SensorManager
+│    ├── MPU6050
+│    ├── LightSensor
+│    └── Filter
+│
+└── Monitor
+├── OLED
+└── UART Debug
 
 TBD
