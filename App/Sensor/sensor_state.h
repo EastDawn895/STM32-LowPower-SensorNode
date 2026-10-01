@@ -13,6 +13,8 @@ typedef struct {
 
     HAL_StatusTypeDef mpuRc;
     HAL_StatusTypeDef lightRc;
+
+    HAL_StatusTypeDef gyroCalRc;
 } SensorData_t;
 
 extern SensorData_t g_sensorData;

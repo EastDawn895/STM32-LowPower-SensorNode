@@ -1,9 +1,7 @@
 #include "monitor.h"
-
 #include "sensor_state.h"
-
-#include "debug.h"
 #include "oled.h"
+#include "debug.h"
 #include "main.h"
 
 
@@ -23,10 +21,7 @@ void Monitor_Init(void)
 void Monitor_Update(void)
 {
 
-    HAL_GPIO_TogglePin(
-        LED_GPIO_Port,
-        LED_Pin
-    );
+
 
 
     PrintSensorData();
@@ -99,6 +94,12 @@ static void PrintSensorData(void)
             6
         );
 
+    }else
+    {
+        Debug_Print("MPU ERROR=");
+        Debug_PrintInt(
+            g_sensorData.mpuRc
+        );
     }
 
 
