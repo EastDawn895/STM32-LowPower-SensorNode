@@ -4,8 +4,10 @@
 
 #include "mpu6050.h"
 #include "light_sensor.h"
+#include "light_state.h"
 #include "moving_avg.h"
 #include "debug.h"
+#include "motion_state.h"
 
 #include "main.h"
 
@@ -15,13 +17,15 @@ extern ADC_HandleTypeDef hadc1;
 
 
 static MovingAvg_t f_gx;
-static MovingAvg_t f_light;
+static MovingAvg_t f_light; 
 
 
 void SensorManager_Init(void)
 {
     MovingAvg_Init(&f_gx);
     MovingAvg_Init(&f_light);
+    LightState_Init();
+    MotionState_Init();
 
     g_sensorData.mpuRc =
         MPU6050_Init(&hi2c2);
@@ -68,7 +72,7 @@ void SensorManager_Update(void)
         int16_t gx = g_sensorData.mpu.gx;
 
 
-        if(gx > 300 || gx < -300)
+        if(gx > 30000 || gx < -30000)
         {
             gx = 0;
         }
@@ -76,8 +80,10 @@ void SensorManager_Update(void)
         g_sensorData.gxFiltered =
             MovingAvg_Update(
                 &f_gx,
-                g_sensorData.mpu.gx
+                gx
             );
+        MotionState_Update(g_sensorData.gxFiltered);
+
     }
 
 
@@ -96,6 +102,7 @@ void SensorManager_Update(void)
                 &f_light,
                 g_sensorData.lightRaw
             );
+        LightState_Update(g_sensorData.lightFiltered);
     }
 
 }

@@ -36,14 +36,7 @@ enable_language(C ASM)
 
 # Create an executable object type
 add_executable(${CMAKE_PROJECT_NAME}
-        Drivers/MPU6050/mpu6050.c
-        Drivers/OLED/oled.c
-        Drivers/OLED/oled.h
-        Drivers/OLED/oled_font.c
 
-        App/Sensor/sensor_manager.c
-        App/Sensor/sensor_manager.h
-        App/Monitor/monitor.c
 )
 
 
@@ -69,6 +62,8 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     App/app.c
         App/Sensor/sensor_state.c
         App/Sensor/sensor_manager.c
+        App/Sensor/light_state.c
+        App/Sensor/motion_state.c
         App/Monitor/monitor.c
         Drivers/Debug/debug.c
         Drivers/MPU6050/mpu6050.c
@@ -76,6 +71,8 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
         Drivers/OLED/oled_font.c
         Drivers/LightSensor/light_sensor.c
         Libs/Filter/moving_avg.c
+
+
 )
 
 # Add include paths
