@@ -60,6 +60,7 @@ target_link_options(${CMAKE_PROJECT_NAME} PRIVATE
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user sources here
     App/app.c
+    App/data_logger.c
         App/Sensor/sensor_state.c
         App/Sensor/sensor_manager.c
         App/Sensor/light_state.c
@@ -70,6 +71,7 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
         Drivers/OLED/oled.c
         Drivers/OLED/oled_font.c
         Drivers/LightSensor/light_sensor.c
+        Drivers/W25Q64/w25q64.c
         Libs/Filter/moving_avg.c
 
 
@@ -87,6 +89,7 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
         Drivers/MPU6050
         Drivers/OLED
         Drivers/LightSensor
+        Drivers/W25Q64
 
         Libs/Filter
 

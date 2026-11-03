@@ -1,4 +1,6 @@
 #include "app.h"
+
+#include "data_logger.h"
 #include "main.h"
 #include "debug.h"
 #include "sensor_manager.h"
@@ -6,6 +8,7 @@
 #include "sensor_state.h"
 #include "light_state.h"
 #include "motion_state.h"
+#include "w25q64.h"
 
 static uint32_t s_sensorTick = 0;    /* 100ms 节拍自己的时基 */
 static uint32_t s_monitorTick = 0;   /* 1000ms 打印显示时基 (把原来的 s_lastTick 改名) */
@@ -16,6 +19,18 @@ void App_Init(void)
     Debug_Init(&huart1);
 
     SensorManager_Init();
+
+    W25Q64_Init();
+
+    DataLogger_Init();
+
+    uint32_t flashID = W25Q64_ReadID();
+
+    Debug_Print("Flash ID=0x");
+    Debug_PrintHex(flashID >> 16);    // 打印高 8 位
+    Debug_PrintHex((flashID >> 8) & 0xFF); // 打印中 8 位
+    Debug_PrintHex(flashID & 0xFF);   // 打印低 8 位
+    Debug_Print("\r\n");
 
     Debug_Print("MPU=");
     Debug_PrintInt(g_sensorData.mpuRc);
@@ -33,6 +48,9 @@ void App_Init(void)
 
 
     Debug_Print("System Init OK\r\n");
+
+
+
 }
 void App_Run(void)
 {
@@ -57,7 +75,7 @@ void App_Run(void)
     if (now - s_sensorTick >= 100u) {
         s_sensorTick = now;
         SensorManager_Update();
-
+        DataLogger_Update();
     }
 
     if (now - s_monitorTick >= 1000u)
@@ -78,4 +96,6 @@ void App_Run(void)
     );
 
     }
+    // 业务代码执行完毕，CPU 进入休眠，等待下一次 SysTick(1ms) 或其他中断唤醒
+    HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
 }

@@ -1,122 +1,99 @@
-# STM32-LowPower-SensorNode
+# 🚀 LowPower-SensorNode (Low-Power Multi-Sensor Anomaly Blackbox)
 
-A low-power real-time data acquisition and monitoring node built on an STM32F103C8T6 (Blue Pill).
+A lightweight, low-power, non-blocking multi-sensor monitoring node based on the STM32F103C8T6. Built entirely in pure C without any RTOS, this project implements a pseudo-Tickless sleep scheduling system via `HAL_GetTick()`, a soft state machine with hysteresis debouncing, and a ring-buffer-based Flash power-loss blackbox data logger.
 
-The project is a from-scratch migration from the legacy Keil + Standard Peripheral Library (SPL)
-toolchain to a modern **STM32CubeMX + HAL + CMake + GCC** workflow, developed in CLion.
+## 🛠 Tech Stack & Development Environment
+* **MCU**: STM32F103C8T6 (ARM Cortex-M3 @ 72MHz)
+* **Environment**: Ubuntu 24.04 + CLion + CMake + Ninja
+* **Toolchain**: `arm-none-eabi-gcc` (STM32CubeCLT)
+* **Core Peripherals**: MPU6050 (I2C2), Photoresistor (ADC1), W25Q64 (SPI2), SSD1306 OLED (Soft-I2C)
 
-> Status: Sensor acquisition pipeline is operational.
-> MPU6050, light sensor, OLED monitoring, filtering and modular application
-> architecture have been implemented. FreeRTOS and low-power optimization are planned.
+---
 
-## Hardware
+## 🏗 System Architecture
 
-| Component | Detail |
-|-----------|--------|
-| MCU       | STM32F103C8T6 (Cortex-M3, 64 KiB Flash, 20 KiB SRAM) |
-| Board     | Blue Pill |
-| Crystal   | 8 MHz HSE → PLL ×9 → 72 MHz system clock |
-| Debug     | USART1 (PA9 TX / PA10 RX) @ 115200 8N1 |
-| Indicator | LED on PA6 |
+The system features a strict multi-layer architecture, achieving complete decoupling between hardware drivers, core algorithms, and application scheduling:
 
-## Current Features
+```text
++-------------------------------------------------------------------+
+|                         App Layer (Scheduling)                    |
+|                                                                   |
+|   +-------------------+  +------------------+  +----------------+ |
+|   |   SensorManager   |  |   DataLogger     |  |    Monitor     | |
+|   | (100ms Tick Rate) |  |   (Edge Trigger) |  | (1s UI Refresh)| |
+|   +-------------------+  +------------------+  +----------------+ |
++-------------------------------------------------------------------+
+|                       Core Logic & Algorithms                     |
+|                                                                   |
+|   +-------------------+  +------------------+                     |
+|   |  Moving Average   |  |   FSM            | <-- Hysteresis &    |
+|   |  Filter           |  |  (Motion/Light)  |     Debounce Filter |
+|   +-------------------+  +------------------+                     |
++-------------------------------------------------------------------+
+|                         Hardware Drivers                          |
+|                                                                   |
+|   +-------+  +-----------+  +-------------+  +---------------+    |
+|   |  ADC  |  | Hardware  |  |  Hardware   |  | Software I2C  |    |
+|   |       |  | I2C (DMA) |  | SPI (Polling)|  | (GPIO Bitbang)|    |
+|   +-------+  +-----------+  +-------------+  +---------------+    |
+|    Light        MPU6050          W25Q64            SSD1306        |
++-------------------------------------------------------------------+
+✨ Core Features & Engineering Implementation
+1. Non-blocking FSM & Hysteresis
+Eliminates blocking HAL_Delay() completely, relying on timestamp management for periodic sensor sampling and multitasking.
+A hysteresis comparator algorithm is introduced into the state evaluation, completely resolving false triggers caused by sensor reading fluctuations around a single threshold.
 
-- [x] CubeMX + HAL project skeleton with CMake + GCC (arm-none-eabi)
-- [x] 72 MHz system clock (HSE + PLL ×9, Flash latency 2 WS)
-- [x] Debug UART driver with decoupled handle injection (`Drivers/Debug`)
-- [x] App layer with a **non-blocking 1 s scheduler** (`HAL_GetTick()` + period compare,
-      no busy-wait `HAL_Delay`)
-- [x] LED heartbeat on PA6
+Plaintext
+       [ Motion State Transition Logic ]
+                  
+           +-----------+
+      +--> |   IDLE    | --- (Gx > Threshold A) --->+
+      |    +-----------+                            |
+(Gx < Threshold B)                                  |
+      |    +-----------+                            |
+      +--- |  ACTIVE   | <--------------------------+
+           +-----------+
+    * The gap between Threshold A and B creates a hysteresis band, 
+      effectively filtering out physical vibration noise.
+2. Edge-Triggered Flash Data Logger
+To prevent Flash wear-out from continuous anomaly writing, the system logs data strictly at the moment of state transition (edge). Upon power-on/reset, the system automatically scans the Flash memory to locate the next blank address for continuous writing.
 
-## Planned / In Progress
+Flash Memory Layout & Ring Buffer Mechanism:
+The log struct is strictly 32 Bytes aligned. The first 8192 bytes (2 sectors) act as a ring buffer, capable of storing 256 high-precision historical records.
 
-- [ ] I2C + MPU6050 (accelerometer + gyroscope) data acquisition
-- [ ] Sensor data filtering (low-pass / complementary filter)
-- [ ] State machine for sleep / sample / alarm scheduling
-- [ ] Alarm / threshold detection
-- [ ] SPI + W25Q64 flash storage
-- [ ] RTOS port (FreeRTOS)
-- [ ] Low-power modes (Sleep / Stop / Standby)
+Plaintext
+[ 32-Byte Aligned SensorLog_t ]
+  0      4      8      9      10             32 (Bytes)
+  +------+------+------+------+--------------+
+  | Time | Value|Source|LState| Reserved(22) |
+  +------+------+------+------+--------------+
 
-## Project Structure
+[ Flash Ring Address Allocation & Erase Policy ]
+  0x0000        0x1000 (4096)   0x2000 (8192)
+  |===============|===============| -> % 8192 (Auto wraps back to 0)
+     Sector 0         Sector 1
+  (128 Entries)    (128 Entries)
+  * Automatically triggers W25Q64_EraseSector() when the write cursor 
+    crosses the 4096-byte boundary, achieving seamless loop writing.
+3. Pseudo-Tickless Sleep Mode Scheduling
+After processing the 100ms/1000ms business logic in the main loop (while(1)), the system immediately yields CPU control via HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI).
+Relying on the SysTick 1ms interrupt to wake the CPU for brief timestamp checks, the system remains in low-power sleep mode ~99% of the time, resulting in a dramatic reduction in dynamic power consumption.
 
-```
-STM32-LowPower-SensorNode/
-├── App/                     # Application layer (app.c / app.h)
-├── Drivers/
-│   ├── Debug/               # Debug UART driver
-│   ├── CMSIS/               # CMSIS headers (CubeMX)
-│   └── STM32F1xx_HAL_Driver/ # STM32 HAL library
-├── Core/
-│   ├── Inc/                 # main.h, HAL config, IRQ handlers
-│   └── Src/                 # main.c, HAL MSP, startup support
-├── cmake/                   # Toolchain + CubeMX CMake glue
-├── startup_stm32f103xb.s    # Startup file
-├── STM32F103xx_FLASH.ld     # Linker script
-├── STM32-LowPower-SensorNode.ioc  # CubeMX project
-└── CMakeLists.txt
-```
+🚀 Quick Start
+Build & Compile (CMake)
+Bash
+# Generate build files
+cmake -B cmake-build-debug -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=gcc-arm-none-eabi.cmake
 
-The user code lives in `App/` and `Drivers/Debug/` and is kept out of the CubeMX-generated
-`Core/` files as much as possible, so re-generating code from the `.ioc` does not clobber it.
-
-## Build
-
-Prerequisites:
-
-- ARM GNU Toolchain (`arm-none-eabi-gcc`)
-- CMake ≥ 3.22
-- CLion (or any CMake-capable IDE / command line)
-
-The project is generated as a CMake project from the `.ioc` file. Open the folder in CLion and
-build, or from the command line:
-
-```bash
-cmake -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/arm-none-eabi-gcc.cmake
-cmake --build build
-```
-
-Flash the resulting `build/STM32-LowPower-SensorNode.elf` to the board with ST-Link (via
-OpenOCD / GDB or STM32CubeProgrammer).
-
-## Version History
-
-- v0.1
-      - HAL skeleton
-      - UART debug
-      - non-blocking scheduler
-
-- v0.2
-      - MPU6050 I2C driver
-      - OLED display
-
-- v0.3
-      - Gyroscope calibration
-      - Moving average filtering
-      - Sensor sampling pipeline
-
-- v0.4
-      - Refactor application architecture
-      - Separate SensorManager and Monitor modules
-      - Add light sensor acquisition
-
-- v1.0 (planned)
-      - FreeRTOS
-      - low-power modes
-      - alarm system
-      - flash storage
-## License
-
-## Architecture
-
-App
-├── SensorManager
-│    ├── MPU6050
-│    ├── LightSensor
-│    └── Filter
-│
-└── Monitor
-├── OLED
-└── UART Debug
-
-TBD
+# Compile and generate .elf / .hex
+cmake --build cmake-build-debug
+Serial Output Example (Baud: 115200)
+Plaintext
+System Init OK
+Init s_writeAddr:0
+AX=-0.64 Gx=0.00 GxF=0.5 State_M=IDLE   Light=1496 Filter=1425 State_L=HIGH
+Logger: Light Triggered!
+readBack_Time:17369 Source:2 LState:0 Value:3748 s_waddr:32
+AX=-0.64 Gx=434.8 GxF=51.4 State_M=ACTIVE Light=1986 Filter=1984 State_L=NORMAL
+Logger: Motion Triggered!
+readBack_Time:26861 Source:1 LState:1 Value:2853 s_waddr:64
