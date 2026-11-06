@@ -1,0 +1,15 @@
+set pagination off
+set confirm off
+file build/Debug/STM32-LowPower-SensorNode.elf
+target extended-remote :3333
+tbreak App_Run
+continue
+printf "PRE_ROLLOVER health=%d seq=%u cursor=%u dropped=%u\n", 'data_logger.c'::health, 'data_logger.c'::sequence, 'data_logger.c'::cursor, 'data_logger.c'::dropped
+dump binary memory build/hardware-closeout/sram-test-before.bin 0x20001000 0x20001400
+restore build/hardware-closeout/rollover-helper.bin binary 0x20001000
+p ((int (*)(void))0x20001001)()
+printf "POST_ROLLOVER health=%d seq=%u cursor=%u dropped=%u generation=%u current=%u count=%u\n", 'data_logger.c'::health, 'data_logger.c'::sequence, 'data_logger.c'::cursor, 'data_logger.c'::dropped, 'data_logger.c'::generation, 'data_logger.c'::current, 'data_logger.c'::count
+restore build/hardware-closeout/sram-test-before.bin binary 0x20001000
+monitor resume
+detach
+quit

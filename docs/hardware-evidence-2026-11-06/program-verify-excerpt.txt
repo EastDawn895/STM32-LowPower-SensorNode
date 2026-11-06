@@ -1,0 +1,33 @@
+Extract: Release programmed first, Debug restored second. Full session log remains under ignored build/hardware-closeout.
+** Programming Started **
+Warn : Adding extra erase range, 0x08004f04 .. 0x08004fff
+** Programming Finished **
+** Verify Started **
+** Verified OK **
+** Resetting Target **
+Info : dropped 'tcl' connection
+Info : accepting 'gdb' connection on tcp/3333
+[stm32f1x.cpu] halted due to debug-request, current mode: Thread 
+xPSR: 0x61000000 pc: 0x080014b8 msp: 0x20004fd8
+Info : dropped 'gdb' connection
+Info : accepting 'tcl' connection on tcp/6666
+[stm32f1x.cpu] halted due to debug-request, current mode: Thread 
+xPSR: 0x01000000 pc: 0x08002abc msp: 0x20005000
+** Programming Started **
+Warn : Adding extra erase range, 0x08005998 .. 0x08005bff
+** Programming Finished **
+** Verify Started **
+** Verified OK **
+** Resetting Target **
+Info : dropped 'tcl' connection
+Info : accepting 'tcl' connection on tcp/6666
+[stm32f1x.cpu] halted due to debug-request, current mode: Thread 
+xPSR: 0x61000000 pc: 0x080017d4 msp: 0x20004ff0
+Read-only external Flash backup: build/hardware-closeout/external-final.bin (8192 bytes)
+Warn : target not halted
+
+Info : dropped 'tcl' connection
+Info : accepting 'tcl' connection on tcp/6666
+Warn : target not halted
+
+shutdown command invoked

@@ -1,0 +1,42 @@
+proc xfer {value} {
+    mww 0x4000380c $value
+    for {set n 0} {$n < 100} {incr n} {
+        set sr [lindex [read_memory 0x40003808 32 1] 0]
+        if {$sr & 1} { return [expr {[lindex [read_memory 0x4000380c 8 1] 0] & 255}] }
+    }
+    error "SPI RXNE timeout"
+}
+proc select_flash {} { mww 0x40010c10 0x10000000 }
+proc release_flash {} { mww 0x40010c10 0x1000 }
+proc backup {name} {
+    select_flash
+    xfer 3
+    xfer 0
+    xfer 0
+    xfer 0
+    set out [open $name wb]
+    fconfigure $out -translation binary
+    for {set i 0} {$i < 8192} {incr i} {
+        puts -nonewline $out [binary format c [xfer 255]]
+    }
+    close $out
+    release_flash
+    echo "Read-only external Flash backup: $name (8192 bytes)"
+}
+init
+halt
+wait_halt 2000
+set saved_cr1 [lindex [read_memory 0x40003800 32 1] 0]
+release_flash
+# Preserve the running application's configured SPI2 mode; drain residual RXNE.
+if {[lindex [read_memory 0x40003808 32 1] 0] & 1} { read_memory 0x4000380c 8 1 }
+select_flash
+xfer 159
+set id [list [xfer 255] [xfer 255] [xfer 255]]
+release_flash
+echo "JEDEC bytes: $id"
+backup build/hardware-closeout/external-before-a.bin
+backup build/hardware-closeout/external-before-b.bin
+mww 0x40003800 $saved_cr1
+resume
+shutdown

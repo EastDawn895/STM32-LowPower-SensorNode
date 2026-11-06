@@ -1,0 +1,65 @@
+{
+  "file": "build/hardware-closeout/external-records-after-reset.bin",
+  "headers": [
+    {
+      "sector": 0,
+      "valid": true,
+      "generation": 0
+    },
+    {
+      "sector": 1,
+      "valid": false,
+      "generation": null
+    }
+  ],
+  "records": [
+    {
+      "address": 32,
+      "seq": 0,
+      "tick": 21474,
+      "value": 1505,
+      "source": 2,
+      "state": 2
+    },
+    {
+      "address": 64,
+      "seq": 1,
+      "tick": 85083,
+      "value": 1413,
+      "source": 2,
+      "state": 2
+    },
+    {
+      "address": 96,
+      "seq": 2,
+      "tick": 129191,
+      "value": 3595,
+      "source": 2,
+      "state": 0
+    },
+    {
+      "address": 128,
+      "seq": 3,
+      "tick": 142397,
+      "value": 1716,
+      "source": 2,
+      "state": 2
+    },
+    {
+      "address": 160,
+      "seq": 4,
+      "tick": 159909,
+      "value": -7848,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 192,
+      "seq": 5,
+      "tick": 7451,
+      "value": 12345,
+      "source": 1,
+      "state": 1
+    }
+  ]
+}

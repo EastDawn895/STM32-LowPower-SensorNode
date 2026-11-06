@@ -1,0 +1,54 @@
+warning: File "/home/ed/dev/code/STM32-LowPower-SensorNode/.gdbinit" auto-loading has been declined by your `auto-load safe-path' set to "$debugdir:$datadir/auto-load".
+To enable execution of this file add
+	add-auto-load-safe-path /home/ed/dev/code/STM32-LowPower-SensorNode/.gdbinit
+line to your configuration file "/home/ed/.config/gdb/gdbinit".
+To completely disable this security protection add
+	set auto-load safe-path /
+line to your configuration file "/home/ed/.config/gdb/gdbinit".
+For more information about this security protection see the
+"Auto-loading safe path" section in the GDB manual.  E.g., run from the shell:
+	info "(gdb)Auto-loading safe path"
+0x08001900 in I2C_WaitOnMasterAddressFlagUntilTimeout (hi2c=hi2c@entry=0x200000d8 <hi2c2>, Flag=Flag@entry=65538, Timeout=Timeout@entry=10, Tickstart=Tickstart@entry=46578) at /home/ed/dev/code/STM32-LowPower-SensorNode/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_i2c.c:7386
+7386	      if (((HAL_GetTick() - Tickstart) > Timeout) || (Timeout == 0U))
+Breakpoint 1 at 0x80016da: file /home/ed/dev/code/STM32-LowPower-SensorNode/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio.c, line 495.
+Note: automatically using hardware breakpoints for read-only addresses.
+LED_EDGE tick=46767 ODR_PA6=1 light=2 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=47017 ODR_PA6=0 light=2 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=47267 ODR_PA6=1 light=2 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=47517 ODR_PA6=0 light=2 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=47767 ODR_PA6=1 light=2 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=48017 ODR_PA6=0 light=2 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=48267 ODR_PA6=1 light=2 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=48517 ODR_PA6=0 light=2 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=48767 ODR_PA6=1 light=2 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=49017 ODR_PA6=0 light=2 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=49267 ODR_PA6=1 light=2 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=49517 ODR_PA6=0 light=2 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=49767 ODR_PA6=1 light=2 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=50017 ODR_PA6=0 light=2 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=50267 ODR_PA6=1 light=2 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=50517 ODR_PA6=0 light=2 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=50767 ODR_PA6=1 light=2 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=51017 ODR_PA6=0 light=2 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=51267 ODR_PA6=1 light=2 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=51517 ODR_PA6=0 light=2 motion=0 logger=0 mpu=1 adc=1
+[Inferior 1 (Remote target) detached]

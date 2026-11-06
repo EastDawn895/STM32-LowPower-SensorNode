@@ -1,0 +1,13 @@
+high () at /home/ed/dev/code/STM32-LowPower-SensorNode/Drivers/OLED/oled.c:38
+38	    return (uint8_t)(health == HAL_OK);
+Temporary breakpoint 1 at 0x800330c: file /home/ed/dev/code/STM32-LowPower-SensorNode/App/app.c, line 32.
+Note: automatically using hardware breakpoints for read-only addresses.
+
+Temporary breakpoint 1, App_Run () at /home/ed/dev/code/STM32-LowPower-SensorNode/App/app.c:32
+32	{
+PRE_ROLLOVER health=0 seq=6 cursor=224 dropped=0
+Restoring binary file build/hardware-closeout/rollover-helper.bin into memory (0x20001000 to 0x2000107c)
+$1 = 260
+POST_ROLLOVER health=0 seq=266 cursor=416 dropped=0 generation=2 current=0 count=0
+Restoring binary file build/hardware-closeout/sram-test-before.bin into memory (0x20001000 to 0x20001400)
+[Inferior 1 (Remote target) detached]

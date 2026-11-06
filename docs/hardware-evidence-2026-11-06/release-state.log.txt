@@ -1,0 +1,4 @@
+0x080014b8 in HAL_PWR_EnterSLEEPMode ()
+build/hardware-closeout/release-state.gdb:5: Error in sourced command file:
+'uwTick' has unknown type; cast it to its declared type
+[Inferior 1 (Remote target) detached]

@@ -1,0 +1,11 @@
+0x080017d4 in HAL_PWR_EnterSLEEPMode (Regulator=Regulator@entry=0, SLEEPEntry=SLEEPEntry@entry=1 '\001') at /home/ed/dev/code/STM32-LowPower-SensorNode/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pwr.c:432
+432	    __WFI();
+Temporary breakpoint 1 at 0x800330c: file /home/ed/dev/code/STM32-LowPower-SensorNode/App/app.c, line 32.
+Note: automatically using hardware breakpoints for read-only addresses.
+
+Temporary breakpoint 1, App_Run () at /home/ed/dev/code/STM32-LowPower-SensorNode/App/app.c:32
+32	{
+PRE_APPEND tick=7451 health=0 seq=5 cursor=192 dropped=0
+$1 = HAL_OK
+POST_ENQUEUE count=1
+[Inferior 1 (Remote target) detached]

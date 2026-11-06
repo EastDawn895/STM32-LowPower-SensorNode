@@ -1,0 +1,22 @@
+#include <stdint.h>
+/* Temporary SRAM test code; calls the exact Debug firmware's production APIs.
+ * Synthetic load records, not physical motion events. No firmware flash write.
+ */
+int run(void)
+{
+    int (*enqueue)(uint8_t,uint8_t,int32_t)=(void*)0x080037a9;
+    void (*update)(void)=(void*)0x0800389d;
+    int (*status)(void)=(void*)0x08003501;
+    uint32_t (*tick)(void)=(void*)0x08000c41;
+    volatile uint8_t *count=(void*)0x200001a3;
+    uint32_t started=tick();
+    for (int i=0;i<260;i++) {
+        if (enqueue(1,1,100000+i)!=0) return -1;
+        while (*count) {
+            update();
+            if (status()!=0) return -2;
+            if (tick()-started>10000) return -3;
+        }
+    }
+    return 260;
+}
