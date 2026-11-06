@@ -1,0 +1,12 @@
+PASS: pre-migration dual 8192-byte backups identical
+PASS: authorized 8192-byte erase readback all FF
+PASS: first 5 actual-event records preserved across reset
+PASS: synthetic marker seq=5 value=12345 readback valid
+PASS: 260 synthetic load records completed, production logger status=READY, dropped=0 (see rollover.log.txt)
+PASS: rollover physical readback: valid generations 2 and 1, 139 contiguous records seq127..265; payloads match
+PASS: final physical readback: 141 contiguous records seq127..267; includes subsequent real LOW events
+PASS: complete 65536-byte MCU final image identical to initial image
+PASS: final Debug loading region matches Debug build binary
+All record/header validity checks used magic + CRC32 + commit + generation; decoder source included.
+NOT EXECUTED: external physical fault recovery, random power interruption, >=30 min continuous soak, current/stack/logic-analyzer measurements.
+Debugger sampling and SRAM load tests perturb scheduling; no timing-bound or power claim.

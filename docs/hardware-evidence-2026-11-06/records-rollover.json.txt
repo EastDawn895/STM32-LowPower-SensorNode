@@ -1,0 +1,1129 @@
+{
+  "file": "build/hardware-closeout/external-rollover.bin",
+  "headers": [
+    {
+      "sector": 0,
+      "valid": true,
+      "generation": 2
+    },
+    {
+      "sector": 1,
+      "valid": true,
+      "generation": 1
+    }
+  ],
+  "records": [
+    {
+      "address": 32,
+      "seq": 254,
+      "tick": 51387,
+      "value": 100248,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 64,
+      "seq": 255,
+      "tick": 51450,
+      "value": 100249,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 96,
+      "seq": 256,
+      "tick": 51451,
+      "value": 100250,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 128,
+      "seq": 257,
+      "tick": 51451,
+      "value": 100251,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 160,
+      "seq": 258,
+      "tick": 51452,
+      "value": 100252,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 192,
+      "seq": 259,
+      "tick": 51452,
+      "value": 100253,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 224,
+      "seq": 260,
+      "tick": 51453,
+      "value": 100254,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 256,
+      "seq": 261,
+      "tick": 51453,
+      "value": 100255,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 288,
+      "seq": 262,
+      "tick": 51454,
+      "value": 100256,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 320,
+      "seq": 263,
+      "tick": 51454,
+      "value": 100257,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 352,
+      "seq": 264,
+      "tick": 51455,
+      "value": 100258,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 384,
+      "seq": 265,
+      "tick": 51455,
+      "value": 100259,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4128,
+      "seq": 127,
+      "tick": 51258,
+      "value": 100121,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4160,
+      "seq": 128,
+      "tick": 51322,
+      "value": 100122,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4192,
+      "seq": 129,
+      "tick": 51322,
+      "value": 100123,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4224,
+      "seq": 130,
+      "tick": 51323,
+      "value": 100124,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4256,
+      "seq": 131,
+      "tick": 51323,
+      "value": 100125,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4288,
+      "seq": 132,
+      "tick": 51324,
+      "value": 100126,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4320,
+      "seq": 133,
+      "tick": 51324,
+      "value": 100127,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4352,
+      "seq": 134,
+      "tick": 51325,
+      "value": 100128,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4384,
+      "seq": 135,
+      "tick": 51325,
+      "value": 100129,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4416,
+      "seq": 136,
+      "tick": 51326,
+      "value": 100130,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4448,
+      "seq": 137,
+      "tick": 51326,
+      "value": 100131,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4480,
+      "seq": 138,
+      "tick": 51327,
+      "value": 100132,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4512,
+      "seq": 139,
+      "tick": 51327,
+      "value": 100133,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4544,
+      "seq": 140,
+      "tick": 51328,
+      "value": 100134,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4576,
+      "seq": 141,
+      "tick": 51328,
+      "value": 100135,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4608,
+      "seq": 142,
+      "tick": 51329,
+      "value": 100136,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4640,
+      "seq": 143,
+      "tick": 51329,
+      "value": 100137,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4672,
+      "seq": 144,
+      "tick": 51330,
+      "value": 100138,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4704,
+      "seq": 145,
+      "tick": 51330,
+      "value": 100139,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4736,
+      "seq": 146,
+      "tick": 51331,
+      "value": 100140,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4768,
+      "seq": 147,
+      "tick": 51331,
+      "value": 100141,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4800,
+      "seq": 148,
+      "tick": 51332,
+      "value": 100142,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4832,
+      "seq": 149,
+      "tick": 51332,
+      "value": 100143,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4864,
+      "seq": 150,
+      "tick": 51333,
+      "value": 100144,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4896,
+      "seq": 151,
+      "tick": 51334,
+      "value": 100145,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4928,
+      "seq": 152,
+      "tick": 51334,
+      "value": 100146,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4960,
+      "seq": 153,
+      "tick": 51335,
+      "value": 100147,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 4992,
+      "seq": 154,
+      "tick": 51335,
+      "value": 100148,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5024,
+      "seq": 155,
+      "tick": 51336,
+      "value": 100149,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5056,
+      "seq": 156,
+      "tick": 51336,
+      "value": 100150,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5088,
+      "seq": 157,
+      "tick": 51337,
+      "value": 100151,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5120,
+      "seq": 158,
+      "tick": 51337,
+      "value": 100152,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5152,
+      "seq": 159,
+      "tick": 51338,
+      "value": 100153,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5184,
+      "seq": 160,
+      "tick": 51338,
+      "value": 100154,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5216,
+      "seq": 161,
+      "tick": 51339,
+      "value": 100155,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5248,
+      "seq": 162,
+      "tick": 51339,
+      "value": 100156,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5280,
+      "seq": 163,
+      "tick": 51340,
+      "value": 100157,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5312,
+      "seq": 164,
+      "tick": 51340,
+      "value": 100158,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5344,
+      "seq": 165,
+      "tick": 51341,
+      "value": 100159,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5376,
+      "seq": 166,
+      "tick": 51341,
+      "value": 100160,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5408,
+      "seq": 167,
+      "tick": 51342,
+      "value": 100161,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5440,
+      "seq": 168,
+      "tick": 51342,
+      "value": 100162,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5472,
+      "seq": 169,
+      "tick": 51343,
+      "value": 100163,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5504,
+      "seq": 170,
+      "tick": 51343,
+      "value": 100164,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5536,
+      "seq": 171,
+      "tick": 51344,
+      "value": 100165,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5568,
+      "seq": 172,
+      "tick": 51344,
+      "value": 100166,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5600,
+      "seq": 173,
+      "tick": 51345,
+      "value": 100167,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5632,
+      "seq": 174,
+      "tick": 51345,
+      "value": 100168,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5664,
+      "seq": 175,
+      "tick": 51346,
+      "value": 100169,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5696,
+      "seq": 176,
+      "tick": 51346,
+      "value": 100170,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5728,
+      "seq": 177,
+      "tick": 51347,
+      "value": 100171,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5760,
+      "seq": 178,
+      "tick": 51347,
+      "value": 100172,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5792,
+      "seq": 179,
+      "tick": 51348,
+      "value": 100173,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5824,
+      "seq": 180,
+      "tick": 51348,
+      "value": 100174,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5856,
+      "seq": 181,
+      "tick": 51349,
+      "value": 100175,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5888,
+      "seq": 182,
+      "tick": 51349,
+      "value": 100176,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5920,
+      "seq": 183,
+      "tick": 51350,
+      "value": 100177,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5952,
+      "seq": 184,
+      "tick": 51351,
+      "value": 100178,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 5984,
+      "seq": 185,
+      "tick": 51351,
+      "value": 100179,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6016,
+      "seq": 186,
+      "tick": 51352,
+      "value": 100180,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6048,
+      "seq": 187,
+      "tick": 51352,
+      "value": 100181,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6080,
+      "seq": 188,
+      "tick": 51353,
+      "value": 100182,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6112,
+      "seq": 189,
+      "tick": 51353,
+      "value": 100183,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6144,
+      "seq": 190,
+      "tick": 51354,
+      "value": 100184,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6176,
+      "seq": 191,
+      "tick": 51354,
+      "value": 100185,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6208,
+      "seq": 192,
+      "tick": 51355,
+      "value": 100186,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6240,
+      "seq": 193,
+      "tick": 51355,
+      "value": 100187,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6272,
+      "seq": 194,
+      "tick": 51356,
+      "value": 100188,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6304,
+      "seq": 195,
+      "tick": 51356,
+      "value": 100189,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6336,
+      "seq": 196,
+      "tick": 51357,
+      "value": 100190,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6368,
+      "seq": 197,
+      "tick": 51357,
+      "value": 100191,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6400,
+      "seq": 198,
+      "tick": 51358,
+      "value": 100192,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6432,
+      "seq": 199,
+      "tick": 51358,
+      "value": 100193,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6464,
+      "seq": 200,
+      "tick": 51359,
+      "value": 100194,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6496,
+      "seq": 201,
+      "tick": 51359,
+      "value": 100195,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6528,
+      "seq": 202,
+      "tick": 51360,
+      "value": 100196,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6560,
+      "seq": 203,
+      "tick": 51360,
+      "value": 100197,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6592,
+      "seq": 204,
+      "tick": 51361,
+      "value": 100198,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6624,
+      "seq": 205,
+      "tick": 51361,
+      "value": 100199,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6656,
+      "seq": 206,
+      "tick": 51362,
+      "value": 100200,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6688,
+      "seq": 207,
+      "tick": 51362,
+      "value": 100201,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6720,
+      "seq": 208,
+      "tick": 51363,
+      "value": 100202,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6752,
+      "seq": 209,
+      "tick": 51363,
+      "value": 100203,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6784,
+      "seq": 210,
+      "tick": 51364,
+      "value": 100204,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6816,
+      "seq": 211,
+      "tick": 51364,
+      "value": 100205,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6848,
+      "seq": 212,
+      "tick": 51365,
+      "value": 100206,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6880,
+      "seq": 213,
+      "tick": 51365,
+      "value": 100207,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6912,
+      "seq": 214,
+      "tick": 51366,
+      "value": 100208,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6944,
+      "seq": 215,
+      "tick": 51366,
+      "value": 100209,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 6976,
+      "seq": 216,
+      "tick": 51367,
+      "value": 100210,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7008,
+      "seq": 217,
+      "tick": 51368,
+      "value": 100211,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7040,
+      "seq": 218,
+      "tick": 51368,
+      "value": 100212,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7072,
+      "seq": 219,
+      "tick": 51369,
+      "value": 100213,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7104,
+      "seq": 220,
+      "tick": 51369,
+      "value": 100214,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7136,
+      "seq": 221,
+      "tick": 51370,
+      "value": 100215,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7168,
+      "seq": 222,
+      "tick": 51370,
+      "value": 100216,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7200,
+      "seq": 223,
+      "tick": 51371,
+      "value": 100217,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7232,
+      "seq": 224,
+      "tick": 51371,
+      "value": 100218,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7264,
+      "seq": 225,
+      "tick": 51372,
+      "value": 100219,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7296,
+      "seq": 226,
+      "tick": 51372,
+      "value": 100220,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7328,
+      "seq": 227,
+      "tick": 51373,
+      "value": 100221,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7360,
+      "seq": 228,
+      "tick": 51373,
+      "value": 100222,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7392,
+      "seq": 229,
+      "tick": 51374,
+      "value": 100223,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7424,
+      "seq": 230,
+      "tick": 51374,
+      "value": 100224,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7456,
+      "seq": 231,
+      "tick": 51375,
+      "value": 100225,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7488,
+      "seq": 232,
+      "tick": 51375,
+      "value": 100226,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7520,
+      "seq": 233,
+      "tick": 51376,
+      "value": 100227,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7552,
+      "seq": 234,
+      "tick": 51376,
+      "value": 100228,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7584,
+      "seq": 235,
+      "tick": 51377,
+      "value": 100229,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7616,
+      "seq": 236,
+      "tick": 51377,
+      "value": 100230,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7648,
+      "seq": 237,
+      "tick": 51378,
+      "value": 100231,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7680,
+      "seq": 238,
+      "tick": 51378,
+      "value": 100232,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7712,
+      "seq": 239,
+      "tick": 51379,
+      "value": 100233,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7744,
+      "seq": 240,
+      "tick": 51379,
+      "value": 100234,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7776,
+      "seq": 241,
+      "tick": 51380,
+      "value": 100235,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7808,
+      "seq": 242,
+      "tick": 51380,
+      "value": 100236,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7840,
+      "seq": 243,
+      "tick": 51381,
+      "value": 100237,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7872,
+      "seq": 244,
+      "tick": 51381,
+      "value": 100238,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7904,
+      "seq": 245,
+      "tick": 51382,
+      "value": 100239,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7936,
+      "seq": 246,
+      "tick": 51382,
+      "value": 100240,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 7968,
+      "seq": 247,
+      "tick": 51383,
+      "value": 100241,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 8000,
+      "seq": 248,
+      "tick": 51383,
+      "value": 100242,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 8032,
+      "seq": 249,
+      "tick": 51384,
+      "value": 100243,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 8064,
+      "seq": 250,
+      "tick": 51384,
+      "value": 100244,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 8096,
+      "seq": 251,
+      "tick": 51385,
+      "value": 100245,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 8128,
+      "seq": 252,
+      "tick": 51386,
+      "value": 100246,
+      "source": 1,
+      "state": 1
+    },
+    {
+      "address": 8160,
+      "seq": 253,
+      "tick": 51386,
+      "value": 100247,
+      "source": 1,
+      "state": 1
+    }
+  ]
+}

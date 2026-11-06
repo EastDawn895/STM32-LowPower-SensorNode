@@ -1,0 +1,60 @@
+proc xfer {value} {
+    mww 0x4000380c $value
+    for {set n 0} {$n < 100} {incr n} {
+        set sr [lindex [read_memory 0x40003808 32 1] 0]
+        if {$sr & 1} { return [expr {[lindex [read_memory 0x4000380c 8 1] 0] & 255}] }
+    }
+    error "SPI RXNE timeout"
+}
+proc select_flash {} { mww 0x40010c10 0x10000000 }
+proc release_flash {} { mww 0x40010c10 0x1000 }
+proc backup {name} {
+    select_flash
+    xfer 3
+    xfer 0
+    xfer 0
+    xfer 0
+    set out [open $name wb]
+    fconfigure $out -translation binary
+    for {set i 0} {$i < 8192} {incr i} {
+        puts -nonewline $out [binary format c [xfer 255]]
+    }
+    close $out
+    release_flash
+    echo "Read-only external Flash backup: $name (8192 bytes)"
+}
+proc sr {} {
+    select_flash
+    xfer 5
+    set result [xfer 255]
+    release_flash
+    return $result
+}
+init
+halt
+wait_halt 2000
+release_flash
+foreach addr {0 4096} {
+    select_flash
+    xfer 6
+    release_flash
+    if {([sr] & 3) != 2} {error "Flash not idle/write-enabled"}
+    select_flash
+    xfer 32
+    xfer 0
+    xfer [expr {$addr >> 8}]
+    xfer 0
+    release_flash
+    set done 0
+    for {set n 0} {$n < 1000} {incr n} {
+        set status [sr]
+        if {$status == 255} {error "Invalid status"}
+        if {($status & 1) == 0} {set done 1; break}
+        sleep 1
+    }
+    if {!$done} {error "Erase timeout"}
+    echo "Authorized sector erase completed at $addr"
+}
+backup build/hardware-closeout/external-erased.bin
+reset run
+shutdown

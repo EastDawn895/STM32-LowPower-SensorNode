@@ -1,6 +1,5 @@
 #include "motion_state.h"
 
-#include "light_state.h"
 #include "main.h"
 
 static MotionState_t MotionState;
@@ -15,6 +14,8 @@ void MotionState_Init(void)
     confirmStartTick=0;
 }
 
+void MotionState_Invalidate(void) { PendingState=MotionState; confirmStartTick=0; }
+
 MotionState_t MotionState_Get(void)
 {
     return MotionState;
@@ -23,7 +24,7 @@ MotionState_t MotionState_Get(void)
 void MotionState_Update(int32_t gxFiltered)
 {
 
-    int32_t abs_gx = (gxFiltered < 0) ? -gxFiltered : gxFiltered;
+
 
     MotionState_t nextState = MotionState;
     uint32_t now = HAL_GetTick();
@@ -31,12 +32,12 @@ void MotionState_Update(int32_t gxFiltered)
     {
     case MOTION_IDLE:
         {
-            if (abs_gx >MOTION_ACTIVE_THRES)nextState=MOTION_ACTIVE;
+            if (gxFiltered > MOTION_ACTIVE_THRES || gxFiltered < -MOTION_ACTIVE_THRES)nextState=MOTION_ACTIVE;
             break;
         }
     case MOTION_ACTIVE:
         {
-            if (abs_gx <MOTION_IDLE_THRES)nextState=MOTION_IDLE;
+            if (gxFiltered < MOTION_IDLE_THRES && gxFiltered > -MOTION_IDLE_THRES)nextState=MOTION_IDLE;
             break;
         }
 

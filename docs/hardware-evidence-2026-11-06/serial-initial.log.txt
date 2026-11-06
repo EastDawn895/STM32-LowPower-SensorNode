@@ -1,0 +1,8 @@
+AX(g)=-0.02 GX(dps)=0.00 GXF(dps)=0.00 M=IDLE   Light(raw)=2972 F=2884 L=NORMAL Log=2 Drop=3 OLED=0
+AX(g)=-0.02 GX(dps)=0.08 GXF(dps)=0.01 M=IDLE   Light(raw)=2970 F=2885 L=NORMAL Log=2 Drop=3 OLED=0
+AX(g)=-0.02 GX(dps)=0.00 GXF(dps)=0.01 M=IDLE   Light(raw)=2978 F=2887 L=NORMAL Log=2 Drop=3 OLED=0
+AX(g)=-0.02 GX(dps)=0.03 GXF(dps)=0.00 M=IDLE   Light(raw)=2964 F=2883 L=NORMAL Log=2 Drop=3 OLED=0
+AX(g)=-0.02 GX(dps)=-0.09 GXF(dps)=-0.03 M=IDLE   Light(raw)=2976 F=2889 L=NORMAL Log=2 Drop=3 OLED=0
+AX(g)=-0.03 GX(dps)=-0.02 GXF(dps)=0.00 M=IDLE   Light(raw)=2996 F=2910 L=NORMAL Log=2 Drop=3 OLED=0
+AX(g)=-0.02 GX(dps)=0.32 GXF(dps)=0.08 M=IDLE   Light(raw)=2976 F=2910 L=NORMAL Log=2 Drop=3 OLED=0
+AX(g)=-0.02 GX(dps)=0.00 GXF(dps)=0.07 M=IDLE   Light(raw)=2746 F=2684 L=NORMAL Log=2 Drop=3 OLED=0

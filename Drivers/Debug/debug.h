@@ -2,6 +2,10 @@
 #define DEBUG_H
 
 #include "stm32f1xx_hal.h"
+void Debug_BeginFrame(void);
+void Debug_EndFrame(void);
+HAL_StatusTypeDef Debug_GetStatus(void);
+void Debug_PrintUInt(uint32_t val);
 void Debug_PrintFixed(int32_t val, int decimals);
 void Debug_Init(UART_HandleTypeDef *huart);
 void Debug_Print(const char *msg);

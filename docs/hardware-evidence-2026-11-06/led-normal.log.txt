@@ -1,0 +1,24 @@
+0x080017d4 in HAL_PWR_EnterSLEEPMode (Regulator=Regulator@entry=0, SLEEPEntry=SLEEPEntry@entry=1 '\001') at /home/ed/dev/code/STM32-LowPower-SensorNode/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pwr.c:432
+432	    __WFI();
+Breakpoint 1 at 0x80016da: file /home/ed/dev/code/STM32-LowPower-SensorNode/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_gpio.c, line 495.
+Note: automatically using hardware breakpoints for read-only addresses.
+LED_EDGE tick=129940 ODR_PA6=0 light=0 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=130194 ODR_PA6=1 light=0 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=130440 ODR_PA6=0 light=0 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=130691 ODR_PA6=1 light=0 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=130940 ODR_PA6=0 light=0 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=131194 ODR_PA6=1 light=0 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=131440 ODR_PA6=0 light=0 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=131691 ODR_PA6=1 light=0 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=131940 ODR_PA6=0 light=0 motion=0 logger=0 mpu=1 adc=1
+halted: PC: 0x080016dc
+LED_EDGE tick=132194 ODR_PA6=1 light=0 motion=0 logger=0 mpu=1 adc=1
+[Inferior 1 (Remote target) detached]

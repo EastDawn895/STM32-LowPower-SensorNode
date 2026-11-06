@@ -1,0 +1,19 @@
+0x080017d4 in HAL_PWR_EnterSLEEPMode (Regulator=Regulator@entry=0, SLEEPEntry=SLEEPEntry@entry=1 '\001') at /home/ed/dev/code/STM32-LowPower-SensorNode/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_pwr.c:432
+432	    __WFI();
+$1 = 24603
+$2 = {mpu = {ax = -470, ay = -700, az = 17502, temp = -3060, gx = 8, gy = 8, gz = 0}, gxFiltered = 0, lightRaw = 3236, lightFiltered = 3234, mpuRc = HAL_OK, lightRc = HAL_OK, gyroCalRc = HAL_OK, mpuValid = 1 '\001', lightValid = 1 '\001', mpuTick = 24579, lightTick = 24579}
+$3 = LIGHT_LOW
+$4 = MOTION_IDLE
+$5 = LOGGER_READY
+$6 = 448
+$7 = 267
+$8 = 0 '\000'
+$9 = IDLE
+$10 = HAL_OK
+$11 = 0x0
+$12 = 0xb4b2ff77
+$13 = 0x1f9a
+$14 = 0x1310
+$15 = 2
+$16 = 0 '\000'
+[Inferior 1 (Remote target) detached]

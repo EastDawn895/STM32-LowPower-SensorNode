@@ -16,6 +16,7 @@ typedef enum
 
 void MotionState_Init(void);
 MotionState_t MotionState_Get(void);
+void MotionState_Invalidate(void);
 void MotionState_Update(int32_t gxFiltered);
 
 

@@ -3,8 +3,8 @@
 
 #define  LIGHT_LOW_IN 3200
 #define  LIGHT_LOW_OUT 2800
-#define  LIGHT_HIGH_IN 2000
-#define  LIGHT_HIGH_OUT 1800
+#define  LIGHT_HIGH_IN 1800
+#define  LIGHT_HIGH_OUT 2000
 #define  LIGHT_STATE_CONFIRM_MS 500
 
 #include <stdint.h>
@@ -19,6 +19,7 @@ typedef enum
 
 void LightState_Init(void);
 LightState_t LightState_Get(void);
+void LightState_Invalidate(void); /* Cancel pending confirmation; retain last state. */
 void LightState_Update(int32_t lightFiltered);
 
 

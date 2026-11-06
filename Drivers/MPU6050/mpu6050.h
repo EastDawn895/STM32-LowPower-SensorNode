@@ -43,6 +43,8 @@ typedef struct {
 HAL_StatusTypeDef MPU6050_ReadData(I2C_HandleTypeDef *hi2c, MPU6050_Data_t *data);
 HAL_StatusTypeDef MPU6050_Init(I2C_HandleTypeDef *hi2c);
 uint8_t MPU6050_ReadWhoAmI(I2C_HandleTypeDef *hi2c);
+HAL_StatusTypeDef MPU6050_CalibrateStart(uint16_t samples);
+HAL_StatusTypeDef MPU6050_CalibrateStep(I2C_HandleTypeDef *hi2c);
 HAL_StatusTypeDef MPU6050_CalibrateGyro(I2C_HandleTypeDef *hi2c, uint16_t samples);
 
 #endif /* MPU6050_H */

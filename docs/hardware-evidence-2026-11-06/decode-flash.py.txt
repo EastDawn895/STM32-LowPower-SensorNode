@@ -1,0 +1,16 @@
+from pathlib import Path
+import struct,zlib,json,sys
+p=Path(sys.argv[1]);b=p.read_bytes();assert len(b)==8192
+records=[];heads=[]
+def u32(buf,at=0):return struct.unpack_from('<I',buf,at)[0]
+def checked(buf,magic):return u32(buf)==magic and u32(buf,24)==zlib.crc32(buf[:24]) and u32(buf,28)==0x434d5431
+for sector in range(2):
+ h=b[sector*4096:sector*4096+32]
+ good=checked(h,0x534e4831) and u32(h,8)==1 and u32(h,12)==sector
+ heads.append({'sector':sector,'valid':good,'generation':u32(h,4) if good else None})
+ for off in range(32,4096,32):
+  r=b[sector*4096+off:sector*4096+off+32]
+  if r==bytes([255])*32:continue
+  assert good and checked(r,0x534e5231) and u32(r,20)==u32(h,4),(sector,off,'bad record')
+  records.append(dict(address=sector*4096+off,seq=u32(r,4),tick=u32(r,8),value=struct.unpack_from('<i',r,12)[0],source=r[16],state=r[17]))
+print(json.dumps({'file':str(p),'headers':heads,'records':records},indent=2))

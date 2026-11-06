@@ -1,21 +1,22 @@
 #ifndef DATA_LOGGER_H
 #define DATA_LOGGER_H
+#include "stm32f1xx_hal.h"
 
-#include <stdint.h>
-#include "motion_state.h"
-#include "light_state.h"
-
-// 严格 32 字节对齐的日志结构体
+/* On-flash v1 is explicitly little endian, not the in-memory struct layout. */
 typedef struct
 {
-    uint32_t Log_Time;     // 4 字节
-    int32_t  Log_Value;    // 4 字节
-    uint8_t  Log_Source;   // 1 字节: 比如 1=运动, 2=光照
-    uint8_t  Log_LState;   // 1 字节: 触发时的状态枚举
-    uint8_t  Log_Arr[22];  // 22 字节: 预留凑齐 32 字节
+    uint32_t Log_Time;
+    int32_t Log_Value;
+    uint8_t Log_Source, Log_LState;
+    uint8_t Log_Arr[22];
 } SensorLog_t;
 
-void DataLogger_Init(void);
-void DataLogger_Update(void); // 放在主循环里不断扫描边沿
+typedef enum { LOGGER_READY, LOGGER_IO_ERROR, LOGGER_FORMAT_ERROR } LoggerStatus_t;
 
+HAL_StatusTypeDef DataLogger_Init(void); /* Flash must already be initialized. No automatic format of unknown media. */
+void DataLogger_Update(void); /* Call every loop; one bounded I/O stage per call. */
+HAL_StatusTypeDef DataLogger_Enqueue(uint8_t source, uint8_t state, int32_t value);
+LoggerStatus_t DataLogger_GetStatus(void);
+uint32_t DataLogger_GetDropped(void);
+uint8_t DataLogger_IsIdle(void);
 #endif
