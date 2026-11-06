@@ -1,0 +1,32 @@
+cmake_minimum_required(VERSION 3.22)
+project(sensor_node_tests LANGUAGES C)
+set(CMAKE_C_STANDARD 11)
+enable_testing()
+option(SANITIZE "Enable address/undefined sanitizers" OFF)
+add_compile_options(-Wall -Wextra -Werror -Wshadow -Wconversion -UNDEBUG)
+if(SANITIZE)
+    add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=address,undefined)
+endif()
+set(ROOT ${CMAKE_CURRENT_LIST_DIR}/..)
+include_directories(include ${ROOT}/App ${ROOT}/App/Sensor ${ROOT}/App/Monitor
+    ${ROOT}/Drivers/Debug ${ROOT}/Drivers/LightSensor ${ROOT}/Drivers/MPU6050
+    ${ROOT}/Drivers/W25Q64 ${ROOT}/Drivers/OLED ${ROOT}/Libs/Filter)
+function(node_test name)
+    add_executable(${name} ${ARGN})
+    add_test(NAME ${name} COMMAND ${name})
+    set_tests_properties(${name} PROPERTIES TIMEOUT 15)
+endfunction()
+node_test(filter test_filter.c ${ROOT}/Libs/Filter/moving_avg.c)
+node_test(debug test_debug.c ${ROOT}/Drivers/Debug/debug.c)
+node_test(fsm test_fsm.c ${ROOT}/App/Sensor/light_state.c ${ROOT}/App/Sensor/motion_state.c)
+node_test(flash test_flash.c ${ROOT}/Drivers/W25Q64/w25q64.c)
+node_test(logger test_logger.c ${ROOT}/App/data_logger.c)
+node_test(sensors test_sensors.c ${ROOT}/App/Sensor/sensor_manager.c
+    ${ROOT}/App/Sensor/sensor_state.c ${ROOT}/App/Sensor/light_state.c
+    ${ROOT}/App/Sensor/motion_state.c ${ROOT}/Drivers/MPU6050/mpu6050.c ${ROOT}/Libs/Filter/moving_avg.c)
+node_test(oled test_oled.c ${ROOT}/Drivers/OLED/oled.c ${ROOT}/Drivers/OLED/oled_font.c)
+node_test(monitor test_monitor.c ${ROOT}/App/Monitor/monitor.c ${ROOT}/Drivers/Debug/debug.c ${ROOT}/App/Sensor/sensor_state.c)
+node_test(adc test_adc.c ${ROOT}/Drivers/LightSensor/light_sensor.c)
+node_test(app test_app.c ${ROOT}/App/app.c ${ROOT}/App/data_logger.c
+    ${ROOT}/Drivers/W25Q64/w25q64.c ${ROOT}/Drivers/Debug/debug.c ${ROOT}/App/Sensor/sensor_state.c)

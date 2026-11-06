@@ -15,6 +15,8 @@ typedef struct {
     HAL_StatusTypeDef lightRc;
 
     HAL_StatusTypeDef gyroCalRc;
+    uint8_t mpuValid, lightValid;
+    uint32_t mpuTick, lightTick;
 } SensorData_t;
 
 extern SensorData_t g_sensorData;

@@ -1,115 +1,126 @@
-//
-// Created by 26092 on 2026/9/15.
-//
 #include "mpu6050.h"
+#include <limits.h>
+static int32_t bias[3], sum[3];
+static int16_t minimum[3], maximum[3];
+static uint16_t calTarget, calCount;
+static uint8_t raw[14];
+#define IO_MS 10u
 
-static int32_t s_gyro_bias[3];
-static uint8_t buf[14];
-
-static HAL_StatusTypeDef MPU6050_ReadRawData(I2C_HandleTypeDef* hi2c)
+static int16_t signed16(const uint8_t* p)
 {
-    HAL_StatusTypeDef status;
+    uint32_t n = ((uint32_t)p[0] << 8) | p[1];
+    return (int16_t)(n >= 32768u ? (int32_t)n - 65536 : (int32_t)n);
+}
 
-    /* 一次读 14 字节：从 0x3B 开始，芯片自动递增地址 */
-    status = HAL_I2C_Mem_Read(hi2c, MPU6050_ADDR, MPU6050_REG_ACCEL_XOUT_H,
-                              I2C_MEMADD_SIZE_8BIT, buf, 14, 100);
-    if (status != HAL_OK)
+static int16_t corrected(const uint8_t* p, int32_t offset)
+{
+    int32_t n = (int32_t)signed16(p) - offset;
+    if (n > INT16_MAX) n = INT16_MAX;
+    if (n < INT16_MIN) n = INT16_MIN;
+    return (int16_t)n;
+}
+
+static HAL_StatusTypeDef readraw(I2C_HandleTypeDef* i2c)
+{
+    if (!i2c) return HAL_ERROR;
+    return HAL_I2C_Mem_Read(i2c,MPU6050_ADDR,MPU6050_REG_ACCEL_XOUT_H,I2C_MEMADD_SIZE_8BIT, raw, 14,IO_MS);
+}
+
+HAL_StatusTypeDef MPU6050_Init(I2C_HandleTypeDef* i2c)
+{
+    if (!i2c) return HAL_ERROR;
+    uint8_t who = 0;
+    HAL_StatusTypeDef rc = HAL_I2C_Mem_Read(i2c,MPU6050_ADDR,MPU6050_REG_WHO_AM_I,I2C_MEMADD_SIZE_8BIT, &who, 1,IO_MS);
+    if (rc != HAL_OK) return rc;
+    if (who != 0x68u) return HAL_ERROR;
+    /* Explicit DLPF (~5 Hz gyro), 100 Hz internal sample rate, +/-250 dps, +/-2g. */
+    const uint8_t regs[] = {
+        MPU6050_REG_PWR_MGMT_1,MPU6050_REG_CONFIG,MPU6050_REG_SMPLRT_DIV,MPU6050_REG_GYRO_CONFIG,
+        MPU6050_REG_ACCEL_CONFIG
+    };
+    uint8_t values[] = {1, 6, 9, 0, 0};
+    for (unsigned i = 0; i < sizeof regs; i++)
     {
-        return status; /* 把原始返回值原样传出去，别吞成 HAL_ERROR */
+        rc = HAL_I2C_Mem_Write(i2c,MPU6050_ADDR, regs[i],I2C_MEMADD_SIZE_8BIT, &values[i], 1,IO_MS);
+        if (rc != HAL_OK) return rc;
     }
-
     return HAL_OK;
 }
 
-HAL_StatusTypeDef MPU6050_Init(I2C_HandleTypeDef* hi2c)
-{
-    uint8_t val = 0x00;
-
-    /* ① 唤醒 */
-    if (HAL_I2C_Mem_Write(hi2c, MPU6050_ADDR, MPU6050_REG_PWR_MGMT_1,
-                          I2C_MEMADD_SIZE_8BIT, &val, 1, 100) != HAL_OK)
-        return HAL_ERROR;
-
-    /* ② 采样率 */
-    val = 0x00;
-    if (HAL_I2C_Mem_Write(hi2c, MPU6050_ADDR, MPU6050_REG_SMPLRT_DIV,
-                          I2C_MEMADD_SIZE_8BIT, &val, 1, 100) != HAL_OK)
-        return HAL_ERROR;
-
-    /* ③ 陀螺量程 ±250 */
-    val = 0x00;
-    if (HAL_I2C_Mem_Write(hi2c, MPU6050_ADDR, MPU6050_REG_GYRO_CONFIG,
-                          I2C_MEMADD_SIZE_8BIT, &val, 1, 100) != HAL_OK)
-        return HAL_ERROR;
-
-    /* ④ 加速度量程 ±2g */
-    val = 0x00;
-    if (HAL_I2C_Mem_Write(hi2c, MPU6050_ADDR, MPU6050_REG_ACCEL_CONFIG,
-                          I2C_MEMADD_SIZE_8BIT, &val, 1, 100) != HAL_OK)
-        return HAL_ERROR;
-
-    return HAL_OK;
-}
-
-
-uint8_t MPU6050_ReadWhoAmI(I2C_HandleTypeDef* hi2c)
+uint8_t MPU6050_ReadWhoAmI(I2C_HandleTypeDef* i2c)
 {
     uint8_t who = 0;
-
-    if (HAL_I2C_Mem_Read(hi2c, MPU6050_ADDR, MPU6050_REG_WHO_AM_I,
-                         I2C_MEMADD_SIZE_8BIT, &who, 1, 100) != HAL_OK)
-    {
-        return 0; /* 读失败，返回 0 */
-    }
-    return who; /* 读成功，返回真正的数据 */
+    if (!i2c) return 0;
+    if (HAL_I2C_Mem_Read(i2c,MPU6050_ADDR,MPU6050_REG_WHO_AM_I,I2C_MEMADD_SIZE_8BIT, &who, 1,IO_MS) != HAL_OK) return 0;
+    return who;
 }
 
-HAL_StatusTypeDef MPU6050_ReadData(I2C_HandleTypeDef* hi2c, MPU6050_Data_t* data)
+HAL_StatusTypeDef MPU6050_ReadData(I2C_HandleTypeDef* i2c, MPU6050_Data_t* data)
 {
-    HAL_StatusTypeDef rc = MPU6050_ReadRawData(hi2c);
-    if (rc != HAL_OK) {
-        return rc; // 读取失败，立刻退回错误码，不要往下解析
-    }
-
-    data->ax = (int16_t)((buf[0] << 8) | buf[1]);
-    data->ay = (int16_t)((buf[2] << 8) | buf[3]);
-    data->az = (int16_t)((buf[4] << 8) | buf[5]);
-    data->temp = (int16_t)((buf[6] << 8) | buf[7]);
-    /* 陀螺三轴减去开机校准出的零偏：int32 中转再做减法，防溢出 int16 */
-    data->gx = (int16_t)((int32_t)((buf[8] << 8) | buf[9]) - s_gyro_bias[0]);
-    data->gy = (int16_t)((int32_t)((buf[10] << 8) | buf[11]) - s_gyro_bias[1]);
-    data->gz = (int16_t)((int32_t)((buf[12] << 8) | buf[13]) - s_gyro_bias[2]);
-
+    if (!data) return HAL_ERROR;
+    HAL_StatusTypeDef rc = readraw(i2c);
+    if (rc != HAL_OK) return rc;
+    data->ax = signed16(raw);
+    data->ay = signed16(raw + 2);
+    data->az = signed16(raw + 4);
+    data->temp = signed16(raw + 6);
+    data->gx = corrected(raw + 8, bias[0]);
+    data->gy = corrected(raw + 10, bias[1]);
+    data->gz = corrected(raw + 12, bias[2]);
     return HAL_OK;
 }
 
-
-HAL_StatusTypeDef MPU6050_CalibrateGyro(I2C_HandleTypeDef* hi2c, uint16_t samples)
+HAL_StatusTypeDef MPU6050_CalibrateStart(uint16_t samples)
 {
-    /* 步骤：
-       ① samples == 0 → return HAL_ERROR（防除零）
-       ② 定义 MPU6050_Data_t 和三个 int32_t 累加器，清零
-       ③ 循环 samples 次：ReadData 读一份 → gx/gy/gz 分别累加 → HAL_Delay(2)
-       ④ 循环外：累加器各除以 samples，存入 s_gyro_bias[0..2]
-       ⑤ 任何一次 ReadData 失败 → 原样 return 它的错误码
-       全部成功 → return HAL_OK */
-    if (samples == 0)return HAL_ERROR;
-
-    int32_t sum_x = 0, sum_y = 0, sum_z = 0;
-    uint16_t i;
-
-    for (i = 0; i < samples; i++)
+    if (!samples) return HAL_ERROR;
+    calTarget = samples;
+    calCount = 0;
+    for (unsigned i = 0; i < 3; i++)
     {
-        HAL_StatusTypeDef rc = MPU6050_ReadRawData(hi2c);
-        if (rc != HAL_OK) return rc; /* 原样传出去 */
-        sum_x += (int16_t)(int32_t)((buf[8] << 8) | buf[9]);
-        sum_y += (int16_t)(int32_t)((buf[10] << 8) | buf[11]);
-        sum_z += (int16_t)(int32_t)((buf[12] << 8) | buf[13]);
-        HAL_Delay(2);
+        sum[i] = 0;
+        minimum[i] = INT16_MAX;
+        maximum[i] = INT16_MIN;
     }
-    s_gyro_bias[0] = sum_x / samples;
-    s_gyro_bias[1] = sum_y / samples;
-    s_gyro_bias[2] = sum_z / samples;
-
     return HAL_OK;
+}
+
+/* One sample; caller spaces samples >=10 ms and keeps board stationary. */
+HAL_StatusTypeDef MPU6050_CalibrateStep(I2C_HandleTypeDef* i2c)
+{
+    if (!calTarget) return HAL_ERROR;
+    HAL_StatusTypeDef rc = readraw(i2c);
+    if (rc != HAL_OK)
+    {
+        calTarget = 0;
+        return rc;
+    }
+    for (unsigned i = 0; i < 3; i++)
+    {
+        int16_t n = signed16(raw + 8 + 2u * i);
+        sum[i] += n;
+        if (n < minimum[i])minimum[i] = n;
+        if (n > maximum[i])maximum[i] = n;
+        if ((int32_t)maximum[i] - minimum[i] > 500)
+        {
+            calTarget = 0;
+            return HAL_ERROR;
+        }
+    }
+    if (++calCount < calTarget) return HAL_BUSY;
+    for (unsigned i = 0; i < 3; i++) bias[i] = sum[i] / calTarget;
+    calTarget = 0;
+    return HAL_OK;
+}
+
+HAL_StatusTypeDef MPU6050_CalibrateGyro(I2C_HandleTypeDef* i2c, uint16_t samples)
+{
+    if (!i2c || MPU6050_CalibrateStart(samples) != HAL_OK) return HAL_ERROR;
+    HAL_StatusTypeDef rc;
+    do
+    {
+        rc = MPU6050_CalibrateStep(i2c);
+        if (rc == HAL_BUSY) HAL_Delay(10);
+    }
+    while (rc == HAL_BUSY);
+    return rc;
 }

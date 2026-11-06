@@ -12,6 +12,8 @@ void LightState_Init(void)
     confirmStartTick=0;
 }
 
+void LightState_Invalidate(void) { PendingState=LightState; confirmStartTick=0; }
+
 LightState_t LightState_Get(void)
 {
     return LightState;

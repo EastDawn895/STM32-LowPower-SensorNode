@@ -1,320 +1,194 @@
-/* OLED 驱动 (SSD1306, 软件I2C: PB8=SCL, PB9=SDA)
-* 原始实现：江协科技 STM32 教程 (SPL 版)
- * 移植改动：SPL GPIO -> HAL；上电延时改 HAL_Delay；字模表移入 oled_font.c
+/* SSD1306 PB8/PB9 open-drain I2C. Font adapted from Jiangxie STM32 tutorial.
+ * Drawing is RAM-only; Service sends one 16-byte chunk, with ACK/deadline checks.
  */
-
-#include "stm32f1xx_hal.h"
+#include "oled.h"
 #include "oled_font.h"
-#include "stdio.h"
+#include <string.h>
+static uint8_t pixels[1024];
+static uint64_t dirty;
+static HAL_StatusTypeDef health = HAL_ERROR;
+static uint32_t transactionStart, retryTick;
+#define SCL(v) HAL_GPIO_WritePin(GPIOB,GPIO_PIN_8,(v)?GPIO_PIN_SET:GPIO_PIN_RESET)
+#define SDA(v) HAL_GPIO_WritePin(GPIOB,GPIO_PIN_9,(v)?GPIO_PIN_SET:GPIO_PIN_RESET)
 
-
-/*引脚配置*/
-#define OLED_W_SCL(x)	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_8, (x) ? GPIO_PIN_SET : GPIO_PIN_RESET)
-#define OLED_W_SDA(x)	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, (x) ? GPIO_PIN_SET : GPIO_PIN_RESET)
-/*引脚初始化*/
-void OLED_I2C_Init(void)
+static void delay5(void)
 {
-	__HAL_RCC_GPIOB_CLK_ENABLE();
-
-	GPIO_InitTypeDef GPIO_InitStruct = {0};
-	GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_OD;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-	GPIO_InitStruct.Pin   = GPIO_PIN_8 | GPIO_PIN_9;
-	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-	OLED_W_SCL(1);
-	OLED_W_SDA(1);
+    uint32_t start = DWT->CYCCNT, cycles = SystemCoreClock / 200000u;
+    /* Also bounded if the debug cycle counter is unavailable/frozen. */
+    for (unsigned n = 0; n < 10000u; n++)
+    {
+        if (DWT->CYCCNT - start >= cycles)return;
+        __NOP();
+    }
+    health = HAL_ERROR;
 }
 
-/**
-  * @brief  I2C开始
-  * @param  无
-  * @retval 无
-  */
-void OLED_I2C_Start(void)
+static uint8_t high(void)
 {
-	OLED_W_SDA(1);
-	OLED_W_SCL(1);
-	OLED_W_SDA(0);
-	OLED_W_SCL(0);
+    SCL(1);
+    while (HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_8) != GPIO_PIN_SET)
+    {
+        if (HAL_GetTick() - transactionStart >= 5u)
+        {
+            health = HAL_TIMEOUT;
+            return 0;
+        }
+    }
+    delay5();
+    return (uint8_t)(health == HAL_OK);
 }
 
-/**
-  * @brief  I2C停止
-  * @param  无
-  * @retval 无
-  */
-void OLED_I2C_Stop(void)
+static uint8_t send(uint8_t b)
 {
-	OLED_W_SDA(0);
-	OLED_W_SCL(1);
-	OLED_W_SDA(1);
+    if (health != HAL_OK || HAL_GetTick() - transactionStart >= 5u)
+    {
+        health = HAL_TIMEOUT;
+        return 0;
+    }
+    for (unsigned i = 0; i < 8; i++)
+    {
+        SCL(0);
+        SDA((b&0x80u)!=0);
+        delay5();
+        if (!high())return 0;
+        b = (uint8_t)(b << 1);
+    }
+    SCL(0);
+    SDA(1);
+    delay5();
+    if (!high())return 0;
+    uint8_t ack = (uint8_t)(HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_9) == GPIO_PIN_RESET);
+    SCL(0);
+    delay5();
+    if (!ack)health = HAL_ERROR;
+    return ack;
 }
 
-/**
-  * @brief  I2C发送一个字节
-  * @param  Byte 要发送的一个字节
-  * @retval 无
-  */
-void OLED_I2C_SendByte(uint8_t Byte)
+static void packet(uint8_t control, const uint8_t* b, unsigned len)
 {
-	uint8_t i;
-	for (i = 0; i < 8; i++)
-	{
-		OLED_W_SDA(!!(Byte & (0x80 >> i)));
-		OLED_W_SCL(1);
-		OLED_W_SCL(0);
-	}
-	OLED_W_SCL(1);	//额外的一个时钟，不处理应答信号
-	OLED_W_SCL(0);
+    if (health != HAL_OK)return;
+    transactionStart = HAL_GetTick();
+    SDA(1);
+    if (!high())goto stop;
+    if (HAL_GPIO_ReadPin(GPIOB,GPIO_PIN_9) != GPIO_PIN_SET)
+    {
+        health = HAL_ERROR;
+        goto stop;
+    }
+    SDA(0);
+    delay5();
+    SCL(0);
+    if (!send(0x78) || !send(control))goto stop;
+    for (unsigned i = 0; i < len; i++)if (!send(b[i]))break;
+stop:
+    SCL(0);
+    SDA(0);
+    delay5();
+    /* No extra wait on failure. Release both lines even on a stuck bus. */
+    SCL(1);
+    delay5();
+    SDA(1);
+    delay5();
+    retryTick = HAL_GetTick();
 }
 
-/**
-  * @brief  OLED写命令
-  * @param  Command 要写入的命令
-  * @retval 无
-  */
-void OLED_WriteCommand(uint8_t Command)
+static void setup(void)
 {
-	OLED_I2C_Start();
-	OLED_I2C_SendByte(0x78);		//从机地址
-	OLED_I2C_SendByte(0x00);		//写命令
-	OLED_I2C_SendByte(Command);
-	OLED_I2C_Stop();
+    __HAL_RCC_GPIOB_CLK_ENABLE();
+    GPIO_InitTypeDef g = {0};
+    g.Mode = GPIO_MODE_OUTPUT_OD;
+    g.Speed = GPIO_SPEED_FREQ_HIGH;
+    g.Pin = GPIO_PIN_8 | GPIO_PIN_9;
+    g.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(GPIOB, &g);
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+    SCL(1);
+    SDA(1);
+    health = HAL_OK;
+    static const uint8_t init[] = {
+        0xAE, 0x20, 0x02, 0xD5, 0x80, 0xA8, 0x3F, 0xD3, 0, 0x40, 0xA1, 0xC8, 0xDA, 0x12, 0x81, 0xCF, 0xD9, 0xF1, 0xDB,
+        0x30, 0xA4, 0xA6, 0x8D, 0x14, 0xAF
+    };
+    packet(0, init, sizeof init);
+    dirty = UINT64_MAX;
 }
 
-/**
-  * @brief  OLED写数据
-  * @param  Data 要写入的数据
-  * @retval 无
-  */
-void OLED_WriteData(uint8_t Data)
-{
-	OLED_I2C_Start();
-	OLED_I2C_SendByte(0x78);		//从机地址
-	OLED_I2C_SendByte(0x40);		//写数据
-	OLED_I2C_SendByte(Data);
-	OLED_I2C_Stop();
-}
-
-/**
-  * @brief  OLED设置光标位置
-  * @param  Y 以左上角为原点，向下方向的坐标，范围：0~7
-  * @param  X 以左上角为原点，向右方向的坐标，范围：0~127
-  * @retval 无
-  */
-void OLED_SetCursor(uint8_t Y, uint8_t X)
-{
-	OLED_WriteCommand(0xB0 | Y);					//设置Y位置
-	OLED_WriteCommand(0x10 | ((X & 0xF0) >> 4));	//设置X位置高4位
-	OLED_WriteCommand(0x00 | (X & 0x0F));			//设置X位置低4位
-}
-
-/**
-  * @brief  OLED清屏
-  * @param  无
-  * @retval 无
-  */
-void OLED_Clear(void)
-{
-	uint8_t i, j;
-	for (j = 0; j < 8; j++)
-	{
-		OLED_SetCursor(j, 0);
-		for(i = 0; i < 128; i++)
-		{
-			OLED_WriteData(0x00);
-		}
-	}
-}
-
-/**
-  * @brief  OLED显示一个字符
-  * @param  Line 行位置，范围：1~4
-  * @param  Column 列位置，范围：1~16
-  * @param  Char 要显示的一个字符，范围：ASCII可见字符
-  * @retval 无
-  */
-void OLED_ShowChar(uint8_t Line, uint8_t Column, char Char)
-{
-	uint8_t i;
-	OLED_SetCursor((Line - 1) * 2, (Column - 1) * 8);		//设置光标位置在上半部分
-	for (i = 0; i < 8; i++)
-	{
-		OLED_WriteData(OLED_F8x16[Char - ' '][i]);			//显示上半部分内容
-	}
-	OLED_SetCursor((Line - 1) * 2 + 1, (Column - 1) * 8);	//设置光标位置在下半部分
-	for (i = 0; i < 8; i++)
-	{
-		OLED_WriteData(OLED_F8x16[Char - ' '][i + 8]);		//显示下半部分内容
-	}
-}
-
-/**
-  * @brief  OLED显示字符串
-  * @param  Line 起始行位置，范围：1~4
-  * @param  Column 起始列位置，范围：1~16
-  * @param  String 要显示的字符串，范围：ASCII可见字符
-  * @retval 无
-  */
-void OLED_ShowString(uint8_t Line, uint8_t Column, char *String)
-{
-	uint8_t i;
-	for (i = 0; String[i] != '\0'; i++)
-	{
-		OLED_ShowChar(Line, Column + i, String[i]);
-	}
-}
-
-/**
-  * @brief  OLED次方函数
-  * @retval 返回值等于X的Y次方
-  */
-uint32_t OLED_Pow(uint32_t X, uint32_t Y)
-{
-	uint32_t Result = 1;
-	while (Y--)
-	{
-		Result *= X;
-	}
-	return Result;
-}
-
-/**
-  * @brief  OLED显示数字（十进制，正数）
-  * @param  Line 起始行位置，范围：1~4
-  * @param  Column 起始列位置，范围：1~16
-  * @param  Number 要显示的数字，范围：0~4294967295
-  * @param  Length 要显示数字的长度，范围：1~10
-  * @retval 无
-  */
-void OLED_ShowNum(uint8_t Line, uint8_t Column, uint32_t Number, uint8_t Length)
-{
-	uint8_t i;
-	for (i = 0; i < Length; i++)
-	{
-		OLED_ShowChar(Line, Column + i, Number / OLED_Pow(10, Length - i - 1) % 10 + '0');
-	}
-}
-
-/**
-  * @brief  OLED显示数字（十进制，带符号数）
-  * @param  Line 起始行位置，范围：1~4
-  * @param  Column 起始列位置，范围：1~16
-  * @param  Number 要显示的数字，范围：-2147483648~2147483647
-  * @param  Length 要显示数字的长度，范围：1~10
-  * @retval 无
-  */
-void OLED_ShowSignedNum(uint8_t Line, uint8_t Column, int32_t Number, uint8_t Length)
-{
-	uint8_t i;
-	uint32_t Number1;
-	if (Number >= 0)
-	{
-		OLED_ShowChar(Line, Column, '+');
-		Number1 = Number;
-	}
-	else
-	{
-		OLED_ShowChar(Line, Column, '-');
-		Number1 = -Number;
-	}
-	for (i = 0; i < Length; i++)
-	{
-		OLED_ShowChar(Line, Column + i + 1, Number1 / OLED_Pow(10, Length - i - 1) % 10 + '0');
-	}
-}
-
-/**
-  * @brief  OLED显示数字（十六进制，正数）
-  * @param  Line 起始行位置，范围：1~4
-  * @param  Column 起始列位置，范围：1~16
-  * @param  Number 要显示的数字，范围：0~0xFFFFFFFF
-  * @param  Length 要显示数字的长度，范围：1~8
-  * @retval 无
-  */
-void OLED_ShowHexNum(uint8_t Line, uint8_t Column, uint32_t Number, uint8_t Length)
-{
-	uint8_t i, SingleNumber;
-	for (i = 0; i < Length; i++)
-	{
-		SingleNumber = Number / OLED_Pow(16, Length - i - 1) % 16;
-		if (SingleNumber < 10)
-		{
-			OLED_ShowChar(Line, Column + i, SingleNumber + '0');
-		}
-		else
-		{
-			OLED_ShowChar(Line, Column + i, SingleNumber - 10 + 'A');
-		}
-	}
-}
-
-/**
-  * @brief  OLED显示数字（二进制，正数）
-  * @param  Line 起始行位置，范围：1~4
-  * @param  Column 起始列位置，范围：1~16
-  * @param  Number 要显示的数字，范围：0~1111 1111 1111 1111
-  * @param  Length 要显示数字的长度，范围：1~16
-  * @retval 无
-  */
-void OLED_ShowBinNum(uint8_t Line, uint8_t Column, uint32_t Number, uint8_t Length)
-{
-	uint8_t i;
-	for (i = 0; i < Length; i++)
-	{
-		OLED_ShowChar(Line, Column + i, Number / OLED_Pow(2, Length - i - 1) % 2 + '0');
-	}
-}
-
-/**
-  * @brief  OLED初始化
-  * @param  无
-  * @retval 无
-  */
 void OLED_Init(void)
 {
-	HAL_Delay(100);
+    HAL_Delay(100);
+    memset(pixels, 0, sizeof pixels);
+    setup();
+}
 
-	OLED_I2C_Init();			//端口初始化
+HAL_StatusTypeDef OLED_GetStatus(void) { return health; }
 
-	OLED_WriteCommand(0xAE);	//关闭显示
+void OLED_Service(void)
+{
+    if (health != HAL_OK)
+    {
+        if (HAL_GetTick() - retryTick >= 1000u)setup();
+        return;
+    }
+    if (!dirty)return;
+    unsigned chunk = 0;
+    while (!(dirty & (UINT64_C(1) << chunk)))chunk++;
+    unsigned column = (chunk % 8u) * 16u, page = chunk / 8u;
+    uint8_t cmd[3] = {(uint8_t)(0xB0u | page), (uint8_t)(0x10u | (column >> 4)), (uint8_t)(column & 15u)};
+    packet(0, cmd, 3);
+    packet(0x40, &pixels[chunk * 16u], 16);
+    if (health == HAL_OK)dirty &= ~(UINT64_C(1) << chunk);
+}
 
-	OLED_WriteCommand(0xD5);	//设置显示时钟分频比/振荡器频率
-	OLED_WriteCommand(0x80);
+void OLED_Clear(void)
+{
+    memset(pixels, 0, sizeof pixels);
+    dirty = UINT64_MAX;
+}
 
-	OLED_WriteCommand(0xA8);	//设置多路复用率
-	OLED_WriteCommand(0x3F);
+void OLED_ShowChar(uint8_t line, uint8_t col, char ch)
+{
+    if (line < 1u || line > 4u || col < 1u || col > 16u || (unsigned char)ch < 32u || (unsigned char)ch > 126u)return;
+    unsigned top = ((unsigned)line - 1u) * 256u + ((unsigned)col - 1u) * 8u;
+    for (unsigned i = 0; i < 16; i++)
+    {
+        unsigned addr = top + (i < 8u ? i : 128u + i - 8u);
+        uint8_t value = OLED_F8x16[(unsigned char)ch - 32u][i];
+        if (pixels[addr] != value)
+        {
+            pixels[addr] = value;
+            dirty |= UINT64_C(1) << (addr / 16u);
+        }
+    }
+}
 
-	OLED_WriteCommand(0xD3);	//设置显示偏移
-	OLED_WriteCommand(0x00);
+void OLED_ShowString(uint8_t line, uint8_t col, const char* s)
+{
+    if (!s || col < 1u || col > 16u)return;
+    for (unsigned i = 0; i < 17u - col && s[i]; i++)OLED_ShowChar(line, (uint8_t)(col + i), s[i]);
+}
 
-	OLED_WriteCommand(0x40);	//设置显示开始行
+static void number(uint8_t line, uint8_t col, uint32_t n, uint8_t len, unsigned base)
+{
+    static const char digits[] = "0123456789ABCDEF";
+    char b[17];
+    if (!len || len > 16u || col < 1u || (unsigned)col + len > 17u)return;
+    b[len] = 0;
+    for (unsigned i = len; i > 0; i--)
+    {
+        b[i - 1u] = digits[n % base];
+        n /= base;
+    }
+    OLED_ShowString(line, col, b);
+}
 
-	OLED_WriteCommand(0xA1);	//设置左右方向，0xA1正常 0xA0左右反置
+void OLED_ShowNum(uint8_t l, uint8_t c, uint32_t n, uint8_t len) { if (len <= 10u)number(l, c, n, len, 10); }
+void OLED_ShowHexNum(uint8_t l, uint8_t c, uint32_t n, uint8_t len) { if (len <= 8u)number(l, c, n, len, 16); }
+void OLED_ShowBinNum(uint8_t l, uint8_t c, uint32_t n, uint8_t len) { number(l, c, n, len, 2); }
 
-	OLED_WriteCommand(0xC8);	//设置上下方向，0xC8正常 0xC0上下反置
-
-	OLED_WriteCommand(0xDA);	//设置COM引脚硬件配置
-	OLED_WriteCommand(0x12);
-
-	OLED_WriteCommand(0x81);	//设置对比度控制
-	OLED_WriteCommand(0xCF);
-
-	OLED_WriteCommand(0xD9);	//设置预充电周期
-	OLED_WriteCommand(0xF1);
-
-	OLED_WriteCommand(0xDB);	//设置VCOMH取消选择级别
-	OLED_WriteCommand(0x30);
-
-	OLED_WriteCommand(0xA4);	//设置整个显示打开/关闭
-
-	OLED_WriteCommand(0xA6);	//设置正常/倒转显示
-
-	OLED_WriteCommand(0x8D);	//设置充电泵
-	OLED_WriteCommand(0x14);
-
-	OLED_WriteCommand(0xAF);	//开启显示
-
-	OLED_Clear();				//OLED清屏
+void OLED_ShowSignedNum(uint8_t l, uint8_t c, int32_t n, uint8_t len)
+{
+    if (!len || len > 10u || c < 1u || (unsigned)c + len > 16u)return;
+    OLED_ShowChar(l, c, n < 0 ? '-' : '+');
+    number(l, (uint8_t)(c + 1u), n < 0 ? 0u - (uint32_t)n : (uint32_t)n, len, 10);
 }

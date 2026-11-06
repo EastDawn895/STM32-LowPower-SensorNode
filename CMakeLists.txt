@@ -28,7 +28,7 @@ set(CMAKE_PROJECT_NAME STM32-LowPower-SensorNode)
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 # Core project settings
-project(${CMAKE_PROJECT_NAME})
+project(${CMAKE_PROJECT_NAME} LANGUAGES C ASM)
 message("Build type: " ${CMAKE_BUILD_TYPE})
 
 # Enable CMake support for ASM and C languages
@@ -81,7 +81,6 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
     # Add user defined include paths
     App
-        App
         App/Sensor
         App/Monitor
 
@@ -110,14 +109,20 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     # Add user defined libraries
 )
 
-add_compile_options(
-        -mcpu=cortex-m3
-        -mthumb
-        -mfloat-abi=soft
-)
-add_link_options(
-        -mcpu=cortex-m3
-        -mthumb
-        -T${CMAKE_SOURCE_DIR}/STM32F103xx_FLASH.ld
-        -Wl,--gc-sections
-)
+# Apply options to both firmware and CubeMX HAL objects (not directory defaults).
+foreach(t ${CMAKE_PROJECT_NAME} STM32_Drivers)
+    target_compile_options(${t} PRIVATE -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+        -ffunction-sections -fdata-sections
+        $<$<COMPILE_LANGUAGE:C>:-Wall;-Wextra;-Wshadow;-Wconversion>)
+endforeach()
+target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE $<$<CONFIG:Release>:-Os> $<$<COMPILE_LANGUAGE:C>:-Werror>)
+target_compile_options(STM32_Drivers PRIVATE $<$<CONFIG:Release>:-Os>)
+target_link_options(${CMAKE_PROJECT_NAME} PRIVATE -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
+    -Wl,--gc-sections -Wl,-Map=${CMAKE_PROJECT_NAME}.map -Wl,--print-memory-usage)
+get_filename_component(ARM_BIN "${CMAKE_C_COMPILER}" DIRECTORY)
+find_program(ARM_OBJCOPY arm-none-eabi-objcopy HINTS "${ARM_BIN}" REQUIRED)
+find_program(ARM_SIZE arm-none-eabi-size HINTS "${ARM_BIN}" REQUIRED)
+add_custom_command(TARGET ${CMAKE_PROJECT_NAME} POST_BUILD
+    COMMAND ${ARM_OBJCOPY} -O ihex $<TARGET_FILE:${CMAKE_PROJECT_NAME}> ${CMAKE_PROJECT_NAME}.hex
+    COMMAND ${ARM_SIZE} $<TARGET_FILE:${CMAKE_PROJECT_NAME}>
+    VERBATIM)

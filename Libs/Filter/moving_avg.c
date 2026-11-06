@@ -20,6 +20,6 @@ int32_t MovingAvg_Update(MovingAvg_t *f, int32_t sample) {
     }
     f->buf[f->idx] = sample;
     f->sum += sample;
-    f->idx = (f->idx + 1) % MOVING_AVG_WIN;
-    return f->sum / f->count;
+    f->idx = (uint8_t)((f->idx + 1u) % MOVING_AVG_WIN);
+    return (int32_t)(f->sum / f->count);
 }
