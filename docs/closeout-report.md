@@ -1,172 +1,155 @@
-# 工程修复交付报告
+# v1.0.1 候选版本最终收尾报告
 
-日期：2026-11-03。基线HEAD：`bc51bfd1b602e03d781ea188406b603c2b9da034`，分支main。修复尚未提交，未push、打Tag或烧录。**软件验证通过，不能替代板上验收。建议作为v1.0.0候选版本，而非已经完成硬件验收的正式版本。**
+日期：2026-11-06（Asia/Shanghai）。结论：**SOFTWARE READY / HARDWARE PENDING**。
+软件验证通过；板上日志仍为Log=2，日志持久化和其他必要硬件验收未完成，**不满足正式冻结条件**。停止扩大软件修改范围，保留候选版本，不合并main、不创建v1.0.1、不push。
 
-## 1. C01–C10状态
+## 1. 版本与保存状态
 
-| 编号 | 软件状态 | 实际修改与证据 |
-|---|---|---|
-| C01 | 已修复 | 0x05状态读取、JEDEC EF4017检查、WEL检查、操作超时、CS清理、SPI错误传播；flash和app测试通过 |
-| C02 | 已修复 | HIGH进入<1800、退出>2000，LOW保持3200/2800，500 ms；边界、恒定1900、噪声、取消、回绕及禁止直接跨态测试通过 |
-| C03 | 已修复（软件模型） | 双扇区代际、记录序号、CRC、最后提交、读回及擦除验证；多圈、重启、65种轮转切断注入、CRC坏、未知格式、序号/代际回绕通过；真实掉电待验 |
-| C04 | 已修复 | Debug/Release有效sections+GC、Os、map/HEX；新目录完整构建通过，没有扩大链接容量或删除核心功能 |
-| C05 | 已修复 | GX/GXF的100倍定点数统一两位小数，串口标注dps；正负零与两端极值输出通过 |
-| C06 | 已修复 | 固定小数宽度、0位小数、INT32_MIN、安全无符号幅值及非法小数位处理；精确字符串断言通过 |
-| C07 | 已修复 | UART/OLED均显式INVALID/ERROR，覆盖旧显示；过期、错误、恢复专项通过 |
-| C08 | 已修复 | 无效样本取消Pending并清空对应窗口；配置/校准期间无效；连续、间歇、长时间失败恢复测试通过 |
-| C09 | 已修复 | 不丢弃>30000大信号；有符号解码后减偏置，边界饱和；±31000、INT16两端和校准偏置组合通过 |
-| C10 | 已修复 | 正确工具链路径、真实HEX产物、可执行测试命令；移除DMA、远程报警、Tickless及未经测量节电指标等错误声明 |
+- 分支：`closeout/v1.0.1-candidate`。
+- 原始main/origin/main基线：`bc51bfd1b602e03d781ea188406b603c2b9da034`。
+- 已存在安全快照：`ad2e1437641f141d1d2e50c40439969bba8068f7`，保存此前48个文件的修复、文档和测试；本次开始时工作区干净，直接沿用，没有重复建分支或覆盖原始修改。
+- 本次软件/测试验收提交：`25d103d`（完整SHA见validation-2026-11-06.txt）。固件源代码与ad2e143相同，本次未发现需要修改的确定性生产缺陷。
+- 本报告随其后的文档提交保存；文档提交号用 `git log -1 --format=%H -- docs/closeout-report.md` 获取，避免在提交内容中自引用SHA。
+- 已有v1.0引用保持 `9dc81069555c0663e0c97ef754a6b39e260a019b`，没有移动、重建或覆盖。未执行破坏性Git操作、远程push、烧录或外部Flash擦除。
 
-## 2. 构建与资源
+## 2. 检查范围与实际结论
 
-| 配置 | 独立全量构建 | Flash（text+data加载量） | 静态RAM（data+bss） | 链接RAM含预留和对齐 |
-|---|---|---|---|---|
-| Debug | PASS | 22,936 B / 65,536 B（35.00%） | 2,256 B | 3,800 B / 20,480 B（18.55%） |
-| Release | PASS | 20,228 B / 65,536 B（30.87%） | 2,256 B | 3,800 B / 20,480 B（18.55%） |
+| 模块 | 有限审查结果 / 对应测试 |
+|---|---|
+| App / LED | GPIO初始化、唯一Toggle调用、故障优先级、正常/业务状态恢复、Tick回绕；新增app_led |
+| MPU6050 / SensorManager | 身份/配置错误返回、增量校准、读取失败无效化及冷却恢复；sensors覆盖断线、合法大数、偏置饱和及滤波重置 |
+| 光敏ADC / 滤波 / FSM | ADC失败清理、八点窗口、滞回严格边界、500 ms光照/300 ms运动确认、取消Pending、进入退出；adc/filter/fsm |
+| Monitor / Debug / OLED | 无效和过期数据显示、单位、输出期限、OLED ACK/NACK及重试、参数边界；monitor/debug/oled |
+| W25Q64 / Logger | JEDEC EF4017、0x05状态、WEL、超时/CS释放、8 MiB驱动边界与页边界、前8 KiB日志区、轮转/恢复/CRC及提交、错误分类；flash/logger |
+| Sleep / 中断共享状态 | 普通WFI，未暂停SysTick，SysTick_Handler调用HAL_IncTick；HAL uwTick为volatile 32位。业务状态只在主循环访问，当前没有ISR生产者队列。app测试确认故障时仍推进服务和Sleep，不能验证真实WFI唤醒 |
 
-两配置.data=20 B、实际.bss=2,236 B；链接heap/stack段含对齐为1,540 B，另有段间对齐。size汇总bss=3,776包含预留，不能当成全局变量占用。heap最低512 B、stack最低1,024 B，未测栈高水位。
+此前快照已包含Flash错误传播和持久化协议、光照滞回、传感器有效性、MPU合法大数、UART单位/整数边界、OLED错误与分块服务、构建裁剪等修复。历史详细记录可用 `git show ad2e143:docs/closeout-report.md` 查看；历史报告的日期、未提交说明和测试结果不作为本次新执行证据。
 
-工具：ARM GCC14.3.1（STM32CubeCLT1.22.0），CMake4.3.1，Ninja1.13.2，本机GCC15.2.0。Debug有效Og，Release有效Os，Cortex-M3/Thumb/soft ABI保持一致；37个编译条目的sections参数已检查，链接实际包含GC。nm确认未用的HAL_I2C_Mem_Read_DMA、HAL_I2C_Master_Seq_Transmit_DMA不再被链接，正常HAL_I2C_Mem_Read保留。
+本次仅新增/扩充测试及纠正文档的候选版本、LED和统计说明；不新增功能、不引入技术栈、不修改厂商HAL或无关风格。
 
-**告警不是零：每个固件配置仍有3条厂商HAL隐式转换告警**，位于stm32f1xx_hal_flash_ex.c:398、530及stm32f1xx_hal_spi.c:1346。没有修改或屏蔽这些告警。自有/生成应用C文件和主机测试启用Werror并通过；字模只补显式括号，原有字节序列已逐项比较不变。
+## 3. LED持续快闪的原因
 
-## 3. 实际执行命令和结果
+代码和README的预期一致：
 
-最终新建验证目录：`build/validation.W69s2J`。该目录为gitignored构建输出，不会作为源文件提交；完整日志在各配置的configure/build/test日志中。最后汇总日志另存`/tmp/node-final-validation.log`。
+| 条件（按优先级） | 每次电平翻转间隔 | 完整亮灭频率 |
+|---|---:|---:|
+| MPU/光敏无效，或Logger非READY，或OLED/UART非HAL_OK | 100 ms | 约5 Hz |
+| 无上述错误，光照非NORMAL或运动ACTIVE | 250 ms | 约2 Hz |
+| 无上述错误且NORMAL/IDLE | 1000 ms | 约0.5 Hz |
 
-执行过：
+PA6为推挽输出、无上下拉、低速，初始化写RESET。仓库没有电路图证据证明LED点亮有效电平，不能仅凭RESET宣称初始灯灭；外接LED极性影响亮灭相位，不影响翻转频率。无定时器/PWM或ISR控制该灯；除GPIO初始化外，唯一运行期写入是App_Run中的Toggle。OLED只操作PB8/9，Flash CS是PB12，没有同GPIO竞争。
+
+状态每轮重算，没有业务告警历史锁存。ledTick只记录最近翻转时间，切换模式后的首次边沿可能延后至新间隔；恢复后不保证立即熄灭，因为正常模式本来就是心跳慢闪。
+
+**用户日志中的Log=2已足以触发100 ms故障闪烁**，因此M=IDLE、L=NORMAL并不意味着整体健康。这是符合现有设计的故障指示，无证据支持修改LED逻辑。尚未连接实板测量PA6波形，也未确认实板固件提交；现场原因的代码解释成立，Flash触发格式保护的具体内容仍未确认。
+
+新增app_led直接编译真实App和两FSM，验证NORMAL→HIGH→NORMAL→LOW→NORMAL分别1000/250/1000/250/1000 ms、运动进入退出、Log=2在正常/异常光照下均100 ms、Log=1、OLED/UART/传感器错误及清除后恢复、Tick回绕。当前生产实现原样通过。**没有复现“违反预期的LED缺陷”，因此没有伪造修复前失败/修复后通过记录。**
+
+## 4. Log、Drop、OLED含义
+
+| 字段 | 实际来源与含义 |
+|---|---|
+| Log | Monitor打印DataLogger_GetStatus：0 READY，1 I/O错误，2 格式/恢复歧义；不是记录数或最后一次写入返回值 |
+| Drop | DataLogger_GetDropped：不可用或4条队列满时每次拒收+1；运行I/O失败时加队列中全部未确认事件并停止写入；稳定状态不增长 |
+| OLED | OLED_GetStatus的HAL状态，0为HAL_OK；不是帧计数，也不能单独证明屏幕内容正确 |
+
+自动日志只记录进入ACTIVE或HIGH/LOW的有效状态边沿；恢复IDLE/NORMAL不入队。Log=2时边沿仍被统计为拒收，故用户日志LOW进入时Drop 5→6、稳定后不增加符合设计。**这些事件没有被日志器接收，不能声称没有数据损失或日志已工作正常。** 没有为显示好看清零、屏蔽或删除统计。
+
+队列满保持Log=0，实际I/O/读回/擦除验证失败置Log=1，格式保护置Log=2。Drop是合计数，不拆分历史原因；断电前已写但未能确认的事件也可能计入。复位/Init重新计数，uint32计数不具备无限累加保证。
+
+Log=2可能来自无有效头但有非空数据（包括旧格式、损坏数据或首次建头被中断），或有效双头的代际歧义。此时保护原数据，**不会自动擦除**。仅凭串口不能确定具体属于哪种情况。应先读出备份前8192字节并检查，不把它误判为队列满或直接认定芯片损坏。详见[日志格式](log-format.md)。
+
+扩充logger测试验证：格式错误保持介质不变、异常边沿拒收计数、稳定/恢复不计数、队列满与I/O故障区别、在途和排队事件失败统一计数。原有多圈、65组轮转切断、CRC、未知格式及回绕用例保留并通过。
+
+## 5. 本次实际软件验证
+
+工具：ARM GCC 14.3.1（STM32CubeCLT 1.22.0），主机GCC 15.2.0，CMake 4.3.1，Ninja 1.13.2。
+
+实际执行用户指定的四条命令，均退出0（现有构建已最新，Ninja无额外工作）：
 
 ```bash
-bash tests/run_validation.sh
 cmake --preset Debug
 cmake --build --preset Debug
 cmake --preset Release
 cmake --build --preset Release
-cmake -S . -B build/readme-debug -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=cmake/gcc-arm-none-eabi.cmake
-cmake --build build/readme-debug
-cmake -S tests -B build/host-analyzer -G Ninja -DCMAKE_C_FLAGS=-fanalyzer
-cmake --build build/host-analyzer
-ctest --test-dir build/host-analyzer --output-on-failure
-git diff --check
+bash tests/run_validation.sh
 ```
 
-- 完整脚本：Debug/Release各新目录38步构建PASS，ELF/HEX/map均存在。
-- 主机普通配置：10/10 PASS。
-- 主机Release优化配置：10/10 PASS，断言没有随NDEBUG关闭。
-- ASan+UBSan Debug配置：10/10 PASS，未报告运行期内存/未定义行为错误。
-- GCC fanalyzer主机配置：编译无告警，10/10 PASS。分析范围是真实模块+主机HAL桩，不包括真实寄存器运行或全厂商库。
-- README预设命令及首次独立路径命令：PASS。
-- HEX校验：两配置PASS，校验每条记录checksum、范围、结束及入口地址，所有数据字节与ELF32 PT_LOAD物理加载段一致。
-- diff检查：PASS。HEAD和暂存区未变；所有修改保留为工作区diff/未跟踪新增文件，待用户审查。
+完整脚本另外在全新 `build/validation.hC64WJ` 独立构建两套固件，确保不只依赖已有产物：
 
-## 4. 新增测试
-
-10个CTest目标编译真实模块，不以重新实现生产算法替代它们：
-
-| 测试 | 范围 |
+| 验证 | 结果 |
 |---|---|
-| filter | 预热、满窗阶跃、长时间索引和int32输入边界 |
-| debug | 固定小数、符号、0/整数、INT32_MIN、UINT32_MAX、无效参数、UART失败/总期限 |
-| fsm | 阈值等于/±1、恒定及噪声、确认取消、两FSM、tick回绕、无直接LOW/HIGH切换 |
-| flash | 协议、WEL、无器件、FF/错误ID、SPI失败/超时、读/编程负载失败、BUSY期限及CS释放 |
-| logger | NOR的1→0/页/扇区约束，多圈及381/384条附近重启，65组分阶段切断，坏CRC、未知格式、队列满及序号/代际回绕 |
-| sensors | 真实Manager+MPU驱动，配置/增量校准、±31000、失联及恢复、无效样本连续/间歇/长时间情况、偏置饱和及身份检查 |
-| oled | 真实软件I2C+字模，ACK阶段释放SDA、NACK、SCL卡低、有界返回、重试及绘图参数边界 |
-| monitor | 真实Monitor+Debug，精确单位值，错误/恢复覆盖OLED旧内容，以及过期数据 |
-| adc | 真实ADC驱动的校准失败、转换失败/清理、停止失败、指针及4095值 |
-| app | 真实App+Flash+Logger+Debug，无Flash时仍调用采样、监控与Sleep，不擦除/编程 |
+| Debug全量构建 | PASS，ELF/HEX/map生成 |
+| Release全量构建 | PASS，ELF/HEX/map生成 |
+| 主机Debug | 11通过 / 0失败 |
+| 主机Release（保留assert） | 11通过 / 0失败 |
+| ASan+UBSan | 11通过 / 0失败，未报告内存/未定义行为错误 |
+| HEX与ELF加载段/校验和/地址校验 | Debug、Release均PASS |
+| git diff --check | PASS |
 
-另有`verify_hex.py`与`run_validation.sh`。HAL桩不模拟全部外设寄存器、电气和异常行为。
+合计11个不同测试目标，三配置33次通过、0失败；不是33个不同测试。完整脚本前另运行过 `build/closeout-host` 11/11，随后新增logger断言以完整脚本结果为准。本次未重跑旧报告中的fanalyzer，不将其写作本次PASS。
 
-## 5. 工程风险处置
+| 配置 | Flash加载量 / 65536 B | 静态data+bss | 链接RAM含预留/对齐 / 20480 B |
+|---|---:|---:|---:|
+| Debug | 22936 B（35.00%） | 2256 B | 3800 B（18.55%） |
+| Release | 20228 B（30.87%） | 2256 B | 3800 B（18.55%） |
 
-- **必须修复、已实施**：Flash错误链与无限等待、日志持久化协议、数据有效性与错误显示、错误物理量、合法大数及整数边界。
-- **建议修复、本次已实施**：OLED ACK/明确DWT时序与分块刷新；UART刷新总预算；MPU身份、显式DLPF/采样配置、增量校准及冷却重试；ADC失败后重新校准；PB5普通输入下拉并同步IOC/中断；关键API边界；有效链接裁剪和主机测试。
-- **保留并公开的限制**：无自动看门狗；致命Error_Handler/CPU异常维持fail-stop，不在停SysTick后调用依赖tick的诊断等待。真实总线卡死仍可能需要人工复位/修复接线；没有宣称任意硬件故障都能自动恢复。
-- **时间限制**：SPI事务10 ms、Logger内部异步轮询；兼容同步擦除500 ms/编程10 ms并未用于Logger运行路径。UART帧20 ms；OLED一个包5 ms、Service最多两个包。MPU超时参数10 ms，但厂商HAL BUSY等待固定25 ms，不能据此宣称单次HAL调用硬上限10 ms。整机最坏调度延迟未实测。
-- **参数/架构边界**：保留裸机框架、MCU及业务引脚；没有新增RTOS或远程功能。OLED新增1 KiB帧缓冲是为解决长时间同步显示阻塞，不是新增显示功能；Logger只在原模块内实现小型写入状态机及固定队列。
+.data=20 B，实际.bss=2236 B；heap/stack预留段1540 B含对齐。未测真实栈峰值。
+每套固件保留3条厂商HAL的-Wconversion告警：flash_ex.c:398/530、spi.c:1346；未隐藏或修改。自有应用及主机测试的Werror编译通过。
 
-## 6. 兼容性与数据安全
+可追溯摘要、CTest原始输出、资源输出和产物SHA256已提交至[本次验证证据](validation-2026-11-06.txt)。完整构建日志保留在上述gitignored目录；可用脚本重新生成。摘要中的SHA256仅对应本次独立构建产物，调试信息可能随构建路径改变。
 
-Flash读写接口现返回状态，保留主要函数名/参数并更新仓库调用；保留ReadID兼容包装，可靠路径使用checked接口。现有外部函数指针绑定若存在需重新编译核对。新增服务函数由App主循环调用。
+## 6. 硬件证据及缺口
 
-**旧Flash日志与v1不兼容。未知格式默认保护，不自动擦除。** 若现板仍有旧日志，新固件会报告格式错误而不是默默初始化；需要用户先备份并自主决定是否清除8 KiB日志区。本任务没有访问或擦除硬件。新格式容量254槽，擦除时会淘汰整个旧扇区；不是始终保留254条。
+本次USB枚举没有ST-Link，未发现/dev/ttyACM*、/dev/ttyUSB*或/dev/serial/by-id设备。存在烧录工具不等于连接了板卡；**未执行烧录、串口采集、外部Flash读取/擦除或实板测试**。
 
-CRC+提交只建立模型内的完整性判定，不保证RAM中尚未提交事件在断电后存在；失败时Drop表示“拒收或未确认持久化”，可能包含已经在器件上完成但未能确认的记录。详见log-format.md。
+仅有用户提供的现场观察，未提供固件SHA、测试时长或仪器波形：
 
-## 7. README和工程说明
+- OLED显示正常，MPU静止读数稳定（示例AX约-0.05g、GX约0.00～0.12dps）。
+- 光照HIGH、NORMAL、LOW可切换；示例LOW进入时Drop 5→6，后续稳定。
+- M=IDLE且L=NORMAL时LED仍快闪；同时Log=2、OLED=0，与上述故障优先级相符。
 
-README重写为当前实现：普通WFI Sleep、保留SysTick；无DMA业务、无Stop/Standby/Tickless、无远程报警；不写功耗百分比。说明裸机同步I/O边界、启动/恢复静止校准、状态阈值、单位、日志迁移、错误码、测试和构建命令。MPU笔记同步修正旧倍率和过时采样/校准描述。
+以上标记为“用户观察”，只支持部分功能运行；不记作整机、Flash持久化、掉电或Sleep功耗验收PASS。
 
-## 8. 未解决项与硬件验证
+### 必要板上验收清单（全部待执行）
 
-没有剩余已知C01–C10软件修复项，但以下未完成，不能记为PASS：
-
-| 项目 | 操作与判定 |
+| 项目 | 明确步骤与判定 |
 |---|---|
-| 基础外设 | 检查8 MHz晶振/时钟、PA0已知电压、WHO_AM_I、JEDEC、UART115200及OLED接线，数据与实物一致 |
-| 光照方向和状态 | 真实明暗/边界扰动，确认ADC方向和阈值物理含义，稳定输入不自激 |
-| MPU静止/恢复 | 静止校准、运动启动、温漂、单独断电恢复；不得把错误校准当正常 |
-| OLED波形 | Debug/Release下分析SCL/SDA、ACK、上升时间及DWT可用性；断线后UART/LED有错误表现 |
-| Flash随机断电 | 头/记录主体与提交、扇区擦除时断电；确认保留的最新扇区、坏槽识别及重启续写 |
-| 调度/可靠性 | GPIO或逻辑分析仪测最大采样间隔，包含擦除、通信错误及UI刷新；长时间运行和栈高水位 |
-| 功耗 | 同条件整板测Sleep与忙循环平均电流；完成前不声明实测收益 |
+| 候选固件及日志迁移 | 记录git SHA、工具版本、接线和启动日志；先用能读外部SPI Flash的工具/调试程序备份至少0x0000～0x1FFF并校验文件。查明Log=2原因；仅确认旧数据不再需要后人工初始化这8 KiB，禁止自动/整片擦除。重启必须Log=0 |
+| 正常/告警/恢复 | 启动和MPU重连校准保持静止；实测NORMAL→HIGH→NORMAL→LOW→NORMAL及运动进入退出。健康正常PA6约1000 ms翻转、业务告警250 ms；故障100 ms且恢复后慢闪。稳定输入至少30 min，检查无意外Drop增长、数据有效、显示正确 |
+| 外设故障恢复 | 分别断开/恢复MPU、光敏和OLED，观察INVALID/ERROR、故障LED、采样及调度仍推进；记录恢复行为。Flash I/O错误后应可见Log=1/Drop，修复连接并复位恢复，不要求运行期自动重试日志 |
+| 日志与断电 | Log=0下制造带已知次序的边沿，等待队列提交，外部读取并核对CRC/序号/值；重启后续写。超过254条验证轮转。分别在擦除、头主体/提交、记录主体/提交阶段多次断电；重启保留最新已确认扇区并能继续，若格式保护必须记录原因；不要求RAM未提交事件幸存 |
+| Sleep / 时序 | 在Debug与Release测量PA6和采样时间，确认WFI唤醒、Tick持续前进、错误和轮转时无永久卡死，记录最大采样间隔与长时间运行结果；同步确认OLED波形和基本外设身份/时钟/ADC方向 |
 
-主机结果不能证明电气质量、Flash耐久/物理掉电模式、实际采样误差、最大栈或整板功耗。SPI/HAL超时要求中断与SysTick正常工作。
+实测电流对比与栈高水位尚无证据，作为已知限制保留；作品集不得宣称具体节电比例、实时上限或栈安全裕量。若后续要作这些声明，需另附测量。
 
-## 9. 发布意见
+## 7. 已知限制与冻结门槛
 
-软件候选版本已具备可复现构建和回归依据，Debug/Release均有充分容量余量。建议先审查全部diff及未跟踪新增文件，再进行以上板上验收；通过后由用户决定commit、Tag与v1.0.0发布。当前不建议标注“全部硬件/功耗/掉电验收完成”。
+- 仍为裸机、普通Sleep且1 ms SysTick唤醒；同步HAL调用会引入采样抖动，整机最坏调度延迟未实测。MPU传入10 ms超时不包含HAL内部固定25 ms BUSY等待。
+- 没有自动看门狗，致命初始化/CPU异常fail-stop；物理总线故障可能需人工排障复位。OLED软件I2C需外部上拉和可用DWT。
+- 日志RAM队列不保证掉电保存，轮转淘汰整个旧扇区，不保证始终保存254条；CRC不是无碰撞保证。主机NOR模型不覆盖所有真实掉电电气行为；首次建头中断且无有效头可能进入格式保护。
+- 日志格式不兼容v1.0的旧记录，迁移需人工备份与明确的数据处理决定；现场Log=2未解决前不能验收日志功能。
+- 仅X轴运动检测，启动/恢复须静止校准；没有实测功耗、温漂、最大栈或长期耐久保证。保留厂商3条编译告警，不作零告警声明。
 
-## 10. 修改文件清单与原因
+**冻结条件**：当前软件验证通过；必要板上清单须有明确候选SHA对应的日志/读回/测量记录，现场Log=2原因已处理、日志可正常持久化，无阻断缺陷，才可合并main并新建v1.0.1。现在只保留候选提交，已有v1.0不动。硬件证据齐备前不发布正式版；未发现理由继续进行架构或功能改造。
 
-| 文件 | 修改原因 |
+## 8. 修改与本地交付
+
+| 本次文件 | 原因 |
 |---|---|
-| `App/Monitor/monitor.c` | C05/C07单位、有效性和旧显示覆盖 |
-| `App/Sensor/light_state.c` | C02/C08阈值与Pending失效 |
-| `App/Sensor/light_state.h` | C02/C08阈值与Pending失效 |
-| `App/Sensor/motion_state.c` | C08和有符号幅值边界 |
-| `App/Sensor/motion_state.h` | C08和有符号幅值边界 |
-| `App/Sensor/sensor_manager.c` | C08/C09有效性、恢复、校准和数据接口 |
-| `App/Sensor/sensor_manager.h` | C08/C09有效性、恢复、校准和数据接口 |
-| `App/Sensor/sensor_state.h` | C08/C09有效性、恢复、校准和数据接口 |
-| `App/app.c` | 服务推进、启动降级、健康LED和保留WFI调度 |
-| `App/data_logger.c` | C03代际、序号、CRC/提交、恢复、分步I/O和失败可观测性 |
-| `App/data_logger.h` | C03代际、序号、CRC/提交、恢复、分步I/O和失败可观测性 |
-| `CMakeLists.txt` | C04有效目标选项、GC、Os、HEX/map/size及自有代码Werror |
-| `Core/Inc/stm32f1xx_it.h` | 同步移除无业务PB5 EXTI，保持输入确定电平 |
-| `Core/Src/main.c` | 同步移除无业务PB5 EXTI，保持输入确定电平 |
-| `Core/Src/stm32f1xx_it.c` | 同步移除无业务PB5 EXTI，保持输入确定电平 |
-| `Core/Src/syscalls.c` | 显式返回/字符转换，消除应用构建告警 |
-| `Drivers/Debug/debug.c` | C06格式/整数边界与UART总期限 |
-| `Drivers/Debug/debug.h` | C06格式/整数边界与UART总期限 |
-| `Drivers/MPU6050/mpu6050.c` | C09符号/偏置饱和、身份/配置及增量校准 |
-| `Drivers/MPU6050/mpu6050.h` | C09符号/偏置饱和、身份/配置及增量校准 |
-| `Drivers/OLED/oled.c` | ACK、时序、分块刷新、参数边界或字模括号告警（字节不变） |
-| `Drivers/OLED/oled.h` | ACK、时序、分块刷新、参数边界或字模括号告警（字节不变） |
-| `Drivers/OLED/oled_font.c` | ACK、时序、分块刷新、参数边界或字模括号告警（字节不变） |
-| `Drivers/W25Q64/w25q64.c` | C01正确协议、期限、WEL/ID、状态返回及参数检查 |
-| `Drivers/W25Q64/w25q64.h` | C01正确协议、期限、WEL/ID、状态返回及参数检查 |
-| `Libs/Filter/moving_avg.c` | int64累加避免通用int32输入溢出，明确索引转换 |
-| `Libs/Filter/moving_avg.h` | int64累加避免通用int32输入溢出，明确索引转换 |
-| `README.md` | C10真实能力、单位、格式迁移、执行证据及硬件限制 |
-| `STM32-LowPower-SensorNode.ioc` | 同步移除无业务PB5 EXTI，保持输入确定电平 |
-| `cmake/gcc-arm-none-eabi.cmake` | 纯C工具链去除不必要的G++依赖 |
-| `docs/closeout-report.md` | C10真实能力、单位、格式迁移、执行证据及硬件限制 |
-| `docs/log-format.md` | C10真实能力、单位、格式迁移、执行证据及硬件限制 |
-| `docs/notes-mpu6050-zh.md` | C10真实能力、单位、格式迁移、执行证据及硬件限制 |
-| `tests/CMakeLists.txt` | 真实模块回归、HAL/NOR桩或可复现构建/HEX验证 |
-| `tests/include/main.h` | 真实模块回归、HAL/NOR桩或可复现构建/HEX验证 |
-| `tests/include/stm32f1xx_hal.h` | 真实模块回归、HAL/NOR桩或可复现构建/HEX验证 |
-| `tests/run_validation.sh` | 真实模块回归、HAL/NOR桩或可复现构建/HEX验证 |
-| `tests/test_adc.c` | 真实模块回归、HAL/NOR桩或可复现构建/HEX验证 |
-| `tests/test_app.c` | 真实模块回归、HAL/NOR桩或可复现构建/HEX验证 |
-| `tests/test_debug.c` | 真实模块回归、HAL/NOR桩或可复现构建/HEX验证 |
-| `tests/test_filter.c` | 真实模块回归、HAL/NOR桩或可复现构建/HEX验证 |
-| `tests/test_flash.c` | 真实模块回归、HAL/NOR桩或可复现构建/HEX验证 |
-| `tests/test_fsm.c` | 真实模块回归、HAL/NOR桩或可复现构建/HEX验证 |
-| `tests/test_logger.c` | 真实模块回归、HAL/NOR桩或可复现构建/HEX验证 |
-| `tests/test_monitor.c` | 真实模块回归、HAL/NOR桩或可复现构建/HEX验证 |
-| `tests/test_oled.c` | 真实模块回归、HAL/NOR桩或可复现构建/HEX验证 |
-| `tests/test_sensors.c` | 真实模块回归、HAL/NOR桩或可复现构建/HEX验证 |
-| `tests/verify_hex.py` | 真实模块回归、HAL/NOR桩或可复现构建/HEX验证 |
+| tests/test_app_led.c、tests/CMakeLists.txt | 新增真实App+FSM的LED优先级/恢复/回绕测试目标 |
+| tests/test_logger.c | 加入Log=2边沿Drop复现和队列满/I/O失败分类断言 |
+| README.md | 明确翻转间隔和Log=2解释，纠正过时的v1.0.0/不提交说明 |
+| docs/log-format.md | 补充状态来源、计数条件及安全诊断/迁移边界 |
+| docs/validation-2026-11-06.txt | 保存本次实际软件验证输出及产物哈希 |
+| docs/closeout-report.md | 替换过时报告，明确版本、证据、硬件缺口及冻结决定 |
+
+.gitignore已检查：build/、IDE目录、目标文件、ELF/HEX/map等均排除；没有提交构建目录。未发现需加入的本次临时/敏感文件，无需修改忽略规则。
+
+用户如需备份候选分支，可自行执行（本任务未执行）：
+
+```bash
+git push -u origin closeout/v1.0.1-candidate
+```
+
+正式冻结后的main与v1.0.1 push必须等硬件验收及本地合并/新Tag完成后再执行，不把候选版本称为正式发布。

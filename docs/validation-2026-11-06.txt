@@ -1,0 +1,194 @@
+STM32-LowPower-SensorNode closeout validation
+Date: 2026-11-06 Asia/Shanghai
+Software/test commit: 25d103dba57444fa17ca675204ed754c1166e110
+Firmware unchanged from snapshot ad2e1437641f141d1d2e50c40439969bba8068f7
+Hardware: NOT EXECUTED; no ST-Link/USB serial enumerated.
+
+$ cmake --version
+cmake version 4.3.1
+
+CMake suite maintained and supported by Kitware (kitware.com/cmake).
+
+$ ninja --version
+1.13.2
+
+$ cc --version
+cc (Ubuntu 15.2.0-16ubuntu1) 15.2.0
+Copyright (C) 2025 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+
+$ /opt/st/stm32cubeclt_1.22.0/GNU-tools-for-STM32/bin/arm-none-eabi-gcc --version
+arm-none-eabi-gcc (GNU Tools for STM32 14.3.rel1.20251027-0700) 14.3.1 20250623
+Copyright (C) 2024 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+
+$ cmake --preset Debug
+$ cmake --build --preset Debug
+PASS (existing build current; ninja: no work to do)
+$ cmake --preset Release
+$ cmake --build --preset Release
+PASS (existing build current; ninja: no work to do)
+$ bash tests/run_validation.sh
+PASS; independent new build directory: /home/ed/dev/code/STM32-LowPower-SensorNode/build/validation.hC64WJ
+
+=== Debug fresh build warning/memory/size extract ===
+/home/ed/dev/code/STM32-LowPower-SensorNode/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash_ex.c:398:12: warning: conversion from 'uint32_t' {aka 'long unsigned int'} to 'uint8_t' {aka 'unsigned char'} may change value [-Wconversion]
+/home/ed/dev/code/STM32-LowPower-SensorNode/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash_ex.c:530:23: warning: conversion from 'uint32_t' {aka 'long unsigned int'} to 'uint8_t' {aka 'unsigned char'} may change value [-Wconversion]
+/home/ed/dev/code/STM32-LowPower-SensorNode/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_spi.c:1346:42: warning: conversion from 'uint32_t' {aka 'long unsigned int'} to 'uint8_t' {aka 'unsigned char'} may change value [-Wconversion]
+Memory region         Used Size  Region Size  %age Used
+             RAM:        3800 B        20 KB     18.55%
+           FLASH:       22936 B        64 KB     35.00%
+   text	   data	    bss	    dec	    hex	filename
+  22916	     20	   3776	  26712	   6858	/home/ed/dev/code/STM32-LowPower-SensorNode/build/validation.hC64WJ/Debug/STM32-LowPower-SensorNode.elf
+
+
+PASS: STM32-LowPower-SensorNode.hex: 22936 data bytes, ELF load segments match
+
+SHA256 Debug/STM32-LowPower-SensorNode.elf 422ac9eb18be1914c10f70d5f9ea50e236d824ca52ec85f3ba0789b4514750ee
+
+SHA256 Debug/STM32-LowPower-SensorNode.hex 6bce292831fc6cbfbe31c176ebc289114236569d094bb21bc98d51584eb44fb2
+
+/home/ed/dev/code/STM32-LowPower-SensorNode/build/validation.hC64WJ/Debug/STM32-LowPower-SensorNode.elf  :
+section               size        addr
+.isr_vector            268   134217728
+.text                20604   134217996
+.rodata               2024   134238600
+.ARM.extab               0   134240624
+.ARM                     8   134240624
+.preinit_array           0   134240632
+.init_array              8   134240632
+.fini_array              4   134240640
+.data                   20   536870912
+.tdata                   0   536870932
+.tbss                    0   536870932
+.bss                  2236   536870936
+._user_heap_stack     1540   536873172
+
+=== Release fresh build warning/memory/size extract ===
+/home/ed/dev/code/STM32-LowPower-SensorNode/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash_ex.c:398:12: warning: conversion from 'uint32_t' {aka 'long unsigned int'} to 'uint8_t' {aka 'unsigned char'} may change value [-Wconversion]
+/home/ed/dev/code/STM32-LowPower-SensorNode/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_flash_ex.c:530:23: warning: conversion from 'uint32_t' {aka 'long unsigned int'} to 'uint8_t' {aka 'unsigned char'} may change value [-Wconversion]
+/home/ed/dev/code/STM32-LowPower-SensorNode/Drivers/STM32F1xx_HAL_Driver/Src/stm32f1xx_hal_spi.c:1346:42: warning: conversion from 'uint32_t' {aka 'long unsigned int'} to 'uint8_t' {aka 'unsigned char'} may change value [-Wconversion]
+Memory region         Used Size  Region Size  %age Used
+             RAM:        3800 B        20 KB     18.55%
+           FLASH:       20228 B        64 KB     30.87%
+   text	   data	    bss	    dec	    hex	filename
+  20208	     20	   3776	  24004	   5dc4	/home/ed/dev/code/STM32-LowPower-SensorNode/build/validation.hC64WJ/Release/STM32-LowPower-SensorNode.elf
+
+
+PASS: STM32-LowPower-SensorNode.hex: 20228 data bytes, ELF load segments match
+
+SHA256 Release/STM32-LowPower-SensorNode.elf 3f2aabbb8b3650fa4768105d92cf6b42d959c6c383232bd644c52f85d8b0f271
+
+SHA256 Release/STM32-LowPower-SensorNode.hex 81606352a3dc419751c5c8bfda6e904299c6c55461383e8ae8c974d08a2afdf1
+
+/home/ed/dev/code/STM32-LowPower-SensorNode/build/validation.hC64WJ/Release/STM32-LowPower-SensorNode.elf  :
+section              size        addr
+.isr_vector           268   134217728
+.text               17968   134217996
+.rodata              1952   134235964
+.ARM.extab              0   134237916
+.ARM                    8   134237916
+.preinit_array          0   134237924
+.init_array             8   134237924
+.fini_array             4   134237932
+.data                  20   536870912
+.tdata                  0   536870932
+.tbss                   0   536870932
+.bss                 2236   536870936
+._user_heap_stack    1540   536873172
+
+=== host CTest ===
+Test project /home/ed/dev/code/STM32-LowPower-SensorNode/build/validation.hC64WJ/host
+      Start  1: filter
+ 1/11 Test  #1: filter ...........................   Passed    0.00 sec
+      Start  2: debug
+ 2/11 Test  #2: debug ............................   Passed    0.00 sec
+      Start  3: fsm
+ 3/11 Test  #3: fsm ..............................   Passed    0.00 sec
+      Start  4: flash
+ 4/11 Test  #4: flash ............................   Passed    0.00 sec
+      Start  5: logger
+ 5/11 Test  #5: logger ...........................   Passed    0.06 sec
+      Start  6: sensors
+ 6/11 Test  #6: sensors ..........................   Passed    0.00 sec
+      Start  7: oled
+ 7/11 Test  #7: oled .............................   Passed    0.00 sec
+      Start  8: monitor
+ 8/11 Test  #8: monitor ..........................   Passed    0.00 sec
+      Start  9: adc
+ 9/11 Test  #9: adc ..............................   Passed    0.00 sec
+      Start 10: app
+10/11 Test #10: app ..............................   Passed    0.00 sec
+      Start 11: app_led
+11/11 Test #11: app_led ..........................   Passed    0.00 sec
+
+100% tests passed, 0 tests failed out of 11
+
+Total Test time (real) =   0.07 sec
+
+=== host-release CTest ===
+Test project /home/ed/dev/code/STM32-LowPower-SensorNode/build/validation.hC64WJ/host-release
+      Start  1: filter
+ 1/11 Test  #1: filter ...........................   Passed    0.00 sec
+      Start  2: debug
+ 2/11 Test  #2: debug ............................   Passed    0.00 sec
+      Start  3: fsm
+ 3/11 Test  #3: fsm ..............................   Passed    0.00 sec
+      Start  4: flash
+ 4/11 Test  #4: flash ............................   Passed    0.00 sec
+      Start  5: logger
+ 5/11 Test  #5: logger ...........................   Passed    0.02 sec
+      Start  6: sensors
+ 6/11 Test  #6: sensors ..........................   Passed    0.00 sec
+      Start  7: oled
+ 7/11 Test  #7: oled .............................   Passed    0.00 sec
+      Start  8: monitor
+ 8/11 Test  #8: monitor ..........................   Passed    0.00 sec
+      Start  9: adc
+ 9/11 Test  #9: adc ..............................   Passed    0.00 sec
+      Start 10: app
+10/11 Test #10: app ..............................   Passed    0.00 sec
+      Start 11: app_led
+11/11 Test #11: app_led ..........................   Passed    0.00 sec
+
+100% tests passed, 0 tests failed out of 11
+
+Total Test time (real) =   0.04 sec
+
+=== host-sanitize CTest ===
+Test project /home/ed/dev/code/STM32-LowPower-SensorNode/build/validation.hC64WJ/host-sanitize
+      Start  1: filter
+ 1/11 Test  #1: filter ...........................   Passed    0.01 sec
+      Start  2: debug
+ 2/11 Test  #2: debug ............................   Passed    0.01 sec
+      Start  3: fsm
+ 3/11 Test  #3: fsm ..............................   Passed    0.01 sec
+      Start  4: flash
+ 4/11 Test  #4: flash ............................   Passed    0.03 sec
+      Start  5: logger
+ 5/11 Test  #5: logger ...........................   Passed    0.09 sec
+      Start  6: sensors
+ 6/11 Test  #6: sensors ..........................   Passed    0.01 sec
+      Start  7: oled
+ 7/11 Test  #7: oled .............................   Passed    0.02 sec
+      Start  8: monitor
+ 8/11 Test  #8: monitor ..........................   Passed    0.01 sec
+      Start  9: adc
+ 9/11 Test  #9: adc ..............................   Passed    0.01 sec
+      Start 10: app
+10/11 Test #10: app ..............................   Passed    0.01 sec
+      Start 11: app_led
+11/11 Test #11: app_led ..........................   Passed    0.01 sec
+
+100% tests passed, 0 tests failed out of 11
+
+Total Test time (real) =   0.23 sec
+
+$ git diff --check
+PASS
+Raw configure/build/test logs remain in ignored build/validation.hC64WJ.
+This evidence file preserves results; it does not claim hardware validation.
