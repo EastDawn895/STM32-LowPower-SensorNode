@@ -9,9 +9,11 @@ static uint8_t flash[8192],snapshot[8192];
 static uint32_t tick,lastErase;
 static int cut=-1;static unsigned prefix;
 SensorData_t g_sensorData;
+static MotionState_t motion = MOTION_IDLE;
+static LightState_t light = LIGHT_NORMAL;
 uint32_t HAL_GetTick(void){return tick++;}
-MotionState_t MotionState_Get(void){return MOTION_IDLE;}
-LightState_t LightState_Get(void){return LIGHT_NORMAL;}
+MotionState_t MotionState_Get(void){return motion;}
+LightState_t LightState_Get(void){return light;}
 HAL_StatusTypeDef W25Q64_ReadData(uint32_t a,uint8_t *b,uint16_t n){assert(a+n<=8192u);memcpy(b,flash+a,n);return HAL_OK;}
 HAL_StatusTypeDef W25Q64_Poll(void){return HAL_OK;}
 HAL_StatusTypeDef W25Q64_BeginErase(uint32_t a){
@@ -54,9 +56,30 @@ int main(void){
     memset(flash,255,sizeof flash);flash[0]=0;memcpy(snapshot,flash,sizeof flash);
     assert(DataLogger_Init()==HAL_ERROR);assert(DataLogger_GetStatus()==LOGGER_FORMAT_ERROR);
     DataLogger_Update();assert(memcmp(flash,snapshot,sizeof flash)==0);
+    /* Offline edge rejection explains Drop with Log=2; recovery edges do not log. */
+    g_sensorData.lightValid=1;g_sensorData.mpuValid=1;
+    light=LIGHT_HIGH;DataLogger_Update();assert(DataLogger_GetDropped()==1);
+    for(int i=0;i<100;i++)DataLogger_Update();
+    assert(DataLogger_GetDropped()==1);
+    light=LIGHT_NORMAL;DataLogger_Update();assert(DataLogger_GetDropped()==1);
+    light=LIGHT_LOW;DataLogger_Update();assert(DataLogger_GetDropped()==2);
+    light=LIGHT_NORMAL;DataLogger_Update();assert(DataLogger_GetDropped()==2);
+    motion=MOTION_ACTIVE;DataLogger_Update();assert(DataLogger_GetDropped()==3);
+    motion=MOTION_IDLE;DataLogger_Update();assert(DataLogger_GetDropped()==3);
+    assert(DataLogger_GetStatus()==LOGGER_FORMAT_ERROR);
+    assert(memcmp(flash,snapshot,sizeof flash)==0);
     memset(flash,255,sizeof flash);assert(DataLogger_Init()==HAL_OK);
     for(int i=0;i<4;i++)assert(DataLogger_Enqueue(2,0,3500)==HAL_OK);
     assert(DataLogger_Enqueue(2,0,3500)==HAL_ERROR);assert(DataLogger_GetDropped()==1);drain();
+    assert(DataLogger_GetStatus()==LOGGER_READY); /* Queue full is not an I/O fault. */
+    memset(flash,255,sizeof flash);assert(DataLogger_Init()==HAL_OK);
+    assert(DataLogger_Enqueue(1,1,3000)==HAL_OK);
+    assert(DataLogger_Enqueue(2,2,1000)==HAL_OK);
+    cut=0;prefix=0;DataLogger_Update();cut=-1;
+    assert(DataLogger_GetStatus()==LOGGER_IO_ERROR && DataLogger_GetDropped()==2);
+    assert(DataLogger_IsIdle());
+    assert(DataLogger_Enqueue(1,1,3000)==HAL_ERROR);
+    assert(DataLogger_GetDropped()==3);
     memset(flash,255,sizeof flash);assert(DataLogger_Init()==HAL_OK);append();
     write32(flash+4,UINT32_MAX);checksum(flash);
     write32(flash+32+4,UINT32_MAX);write32(flash+32+20,UINT32_MAX);checksum(flash+32);

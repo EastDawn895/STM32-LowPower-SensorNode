@@ -30,3 +30,5 @@ node_test(monitor test_monitor.c ${ROOT}/App/Monitor/monitor.c ${ROOT}/Drivers/D
 node_test(adc test_adc.c ${ROOT}/Drivers/LightSensor/light_sensor.c)
 node_test(app test_app.c ${ROOT}/App/app.c ${ROOT}/App/data_logger.c
     ${ROOT}/Drivers/W25Q64/w25q64.c ${ROOT}/Drivers/Debug/debug.c ${ROOT}/App/Sensor/sensor_state.c)
+node_test(app_led test_app_led.c ${ROOT}/App/app.c ${ROOT}/App/Sensor/light_state.c
+    ${ROOT}/App/Sensor/motion_state.c ${ROOT}/App/Sensor/sensor_state.c)
